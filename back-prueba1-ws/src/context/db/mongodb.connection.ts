@@ -9,7 +9,7 @@ const collections: { [key: string]: Collection } = {};
 
 async function createMongoConnectionDefault() {
   try {
-    await MongoClient.connect(url);
+    const client = await MongoClient.connect(url);
     const db = client.db(dbName);
     await addCollections(db);
     console.log("Connected to MongoDB");

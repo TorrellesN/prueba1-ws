@@ -6,12 +6,12 @@ const router = express.Router();
 
 
 
-router.post(`/registro`, async (req: Request, res: Response) => {
+router.post(`/register`, async (req: Request, res: Response) => {
 
     try {
-        const { alias, pwd, correo, nombre, apellidos } = req.body;
+        const { alias, pwd } = req.body;
         
-        res.status(200).send();
+        res.status(200).send('response ok');
 
     } catch (error) {
         res.status(500).send({ message: String(error) });
