@@ -5,6 +5,7 @@
   "scripts": {
     "test": "jest --coverage --runInBand --coverageReporters=html",
     "dev": "nodemon --legacy-watch src/index.ts",
+    "dev:api": "nodemon src/index.ts --api",
     "doc": "ts-node utilities/swagger.ts"
   },
   "keywords": [],
