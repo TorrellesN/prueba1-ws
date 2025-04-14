@@ -9,6 +9,7 @@ dotenv.config();
 
 export const corsConfig: CorsOptions = {
     origin: function(origin, callback) {
+        
         const whitelist = [process.env.FRONTEND_URL]
 
 				// si ejecutamos ese run dev, habra un tercer arg llamado --api, y dejará entrar a todas las conexionesw

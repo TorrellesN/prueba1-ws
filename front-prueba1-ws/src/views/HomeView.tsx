@@ -1,6 +1,10 @@
 import { Link } from 'react-router-dom'
+import { SocketContext } from '../utilities/context/socketContext'
+import { useContext } from 'react';
 
 export default function HomeView() {
+
+  const {online, connectSocket} = useContext(SocketContext);
   return (
     <>
     <h1 className="text-5xl font-black">Mis proyectos</h1>
@@ -23,6 +27,9 @@ export default function HomeView() {
             to='/projects/create'
           >Crear proyecto</Link>
         </p>
+        <button className='button bg-amber-100 cursor-pointer'
+        onClick={connectSocket}
+        >{online ? 'Online' : 'Offline'}</button>
       
 
     

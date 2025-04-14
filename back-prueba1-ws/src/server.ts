@@ -24,6 +24,7 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(logger('dev'));
 app.use(cors(corsConfig));
+console.log(console.log(process.env.FRONTEND_URL))
 
 configureAppRoutes(app);
 

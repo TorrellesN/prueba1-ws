@@ -1,5 +1,9 @@
-import { MongoClient, Collection, Db } from "mongodb";
+import colors from 'colors';
 import dotenv from "dotenv";
+import { Collection, Db, MongoClient } from "mongodb";
+import { exit } from 'node:process';
+
+
 
 dotenv.config();
 
@@ -12,9 +16,10 @@ async function createMongoConnectionDefault() {
     const client = await MongoClient.connect(url);
     const db = client.db(dbName);
     await addCollections(db);
-    console.log("Connected to MongoDB");
+    console.log(colors.cyan.bold("Connected to MongoDB"));
   } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
+    console.log( colors.red.bold('Error al conectar a MongoDB') )
+        exit(1)
   }
 }
 
@@ -24,9 +29,10 @@ async function createMongoConnection() {
     client = await MongoClient.connect(url);
     const db = client.db(dbName);
     await addCollections(db);
-    console.log("Connected to MongoDB");
+    console.log(colors.cyan.bold("Connected to MongoDB"));
   } catch (error) {
-    console.error("Error connecting to MongoDB:", error);
+      console.log( colors.red.bold('Error al conectar a MongoDB') )
+        exit(1)
   }
 }
 
@@ -51,4 +57,5 @@ async function closeMongoConnection() {
 }
 
 export default createMongoConnection;
-export { collections, closeMongoConnection , createMongoConnectionDefault};
+export { closeMongoConnection, collections, createMongoConnectionDefault };
+
