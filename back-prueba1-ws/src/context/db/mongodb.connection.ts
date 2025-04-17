@@ -8,7 +8,7 @@ import { exit } from 'node:process';
 dotenv.config();
 
 const url = process.env.MONGO_URL || "mongodb://localhost:27017";
-const dbName = process.env.MONGO_DB_NAME || "prueba4";
+const dbName = process.env.MONGO_DB_NAME || "prueba";
 const collections: { [key: string]: Collection } = {};
 
 async function createMongoConnectionDefault() {
@@ -37,8 +37,8 @@ async function createMongoConnection() {
 }
 
 const addCollections = (db: Db) => {
-  collections.cafes = db.collection(
-    process.env.MONGO_DB_COLLECTION_CAFES || "tabla1"
+  collections.users = db.collection(
+    process.env.MONGO_DB_COLLECTION_USERS || "tabla1"
   );
 
 };
@@ -46,7 +46,7 @@ const addCollections = (db: Db) => {
 
 
 const addIndexes = () => {
-  collections.prueba1.createIndex({campo: 1},{unique: true});
+  collections.users.createIndex({campo: 1},{unique: true});
 } 
 
 async function closeMongoConnection() {

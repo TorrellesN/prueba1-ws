@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import Usuario, { UserAuth } from "../../domain/User";
-import { createTokenUser, isAuth, isUser } from "../../../context/security/auth";
+import { createTokenUser, isAuth } from "../../../context/security/auth";
 import UserUseCases from "../../application/user.useCases";
 import UserRepositoryPostgreSQL from "../db/user.repository.postgresql";
 import User from "../../domain/User";
@@ -10,6 +10,7 @@ const userUseCases: UserUseCases = new UserUseCases(new UserRepositoryPostgreSQL
 
 router.post('/register', rtRegister);
 router.post('/login', rtLogin);
+router.get('/private', isAuth, rtPrivate);
 
 async function rtRegister (req: Request, res: Response) {
     try {
@@ -33,9 +34,9 @@ async function rtLogin (req: Request, res: Response) {
         const token: string =  createTokenUser(user);
         res.status(200).send({
             
-                user: {
-                    username: user.username
-                },
+                
+                    username: user.username,
+                
                 token: token
             
             
@@ -46,6 +47,21 @@ async function rtLogin (req: Request, res: Response) {
         res.status(500).send({ message: String(error) });
     }
 }
+
+async function rtPrivate (req: Request, res: Response) {
+    try {
+        const {username, email, profileImg} = req.body.auth;
+        const userAuth: UserAuth = {username, email, profileImg};
+
+        res.json({message: 'Accediendo a zona personal',
+            userAuth:  userAuth
+        })
+
+    } catch (error) {
+        res.status(500).send({ message: String(error) });
+    }
+}
+
 
 
 export default router;

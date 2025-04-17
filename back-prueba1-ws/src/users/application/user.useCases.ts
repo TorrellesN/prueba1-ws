@@ -26,8 +26,7 @@ export default class UserUseCases {
         const confirmLogin = await compare(user.pwd, userDB.pwd || '');
         if (!confirmLogin) throw new Error('401');
         
-        const {username, email} = userDB;
-        const userLoged: UserAuth = {username, email}
+        const userLoged: UserAuth = userDB
         return userLoged;
     }
 }

@@ -1,16 +1,18 @@
 import { NextFunction, Request, Response } from "express";
 import Usuario from "../../users/domain/User";
 import jwt, { Secret, JwtPayload } from "jsonwebtoken";
+import User from "../../users/domain/User";
 
-const SECRET_KEY: Secret = "mySecretKey";
+const SECRET_KEY: Secret = "mi-Secreto-Para-Ganar-Sudokus-Es-La-Paciencia";
 
-const createTokenUser = (usuario: Usuario): string => {
+const createTokenUser = (user: User): string => {
  
     const payload = {
-      correo: "",
+      username: user.username,
+      email: user.email,
+      profileImg: user.profileImg
     }
   
-
   return jwt.sign(payload, SECRET_KEY, { expiresIn: "1 days" });
 };
 
@@ -32,10 +34,9 @@ const isAuth = (req: Request, response: Response, next: NextFunction) => {
     if (token) {
       const decoded: any = jwt.verify(token, SECRET_KEY);
       req.body.auth = {
-        correo: decoded.correo,
-        alias: decoded.alias,
-        foto: decoded.foto,
-        ...(decoded.marca && { marca: decoded.marca })
+        username: decoded.username,
+        email: decoded.email,
+        profileImg: decoded.profileImg,
       }
         
       next();
@@ -45,7 +46,7 @@ const isAuth = (req: Request, response: Response, next: NextFunction) => {
   }
 };
 
-const isTienda = async (req: Request, res: Response, next: NextFunction) => {
+/* const isTienda = async (req: Request, res: Response, next: NextFunction) => {
   try {
       if (!req.body.auth.marca) {
         throw new Error('Usuario no autorizado.')
@@ -71,6 +72,6 @@ const isUser = (req: Request, res: Response, next: NextFunction) => {
     res.status(401).send({message: String(error)})
   }
 
-}
+} */
 
-export { createTokenUser, isAuth, isTienda, isUser };
+export { createTokenUser, isAuth };
