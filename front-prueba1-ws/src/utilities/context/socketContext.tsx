@@ -19,6 +19,7 @@ export const SocketProvider = ({children}: {children : React.ReactNode}) => {
 
     useEffect(() => {
         if (online) {
+            console.log('conexion establecida')
             socket.on( 'prueba-evento', (usuarios) => {
                console.log('recibido')
             })

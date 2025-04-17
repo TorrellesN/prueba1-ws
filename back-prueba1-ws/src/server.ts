@@ -1,13 +1,12 @@
 import cors from 'cors';
-import express, { Request, Response } from "express";
+import express from "express";
 import http from 'http';
 import logger from "morgan";
 import { Server } from 'socket.io';
 import { createMongoConnectionDefault } from './context/db/mongodb.connection';
-import configureSocket from './services/socket.connection';
-import usuarioRouter from "./usuarios/infrastructure/rest/usuario.router";
-import configureAppRoutes from './services/app.routes';
 import { corsConfig } from './context/security/cors.config';
+import configureAppRoutes from './services/app.routes';
+import configureSocket from './services/socket.connection';
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("../doc/swagger.json");
 
@@ -24,13 +23,12 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(logger('dev'));
 app.use(cors(corsConfig));
-console.log(console.log(process.env.FRONTEND_URL))
 
 configureAppRoutes(app);
 
 const server = http.createServer(app);
 const io = new Server(server, {
-    cors: options,
+    cors: corsConfig,
     connectionStateRecovery: {} //le puedo pasar un objeto con el tiempo maximo de reconexion
 });
 

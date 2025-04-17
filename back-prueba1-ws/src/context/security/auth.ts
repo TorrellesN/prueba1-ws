@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import Usuario from "../../usuarios/domain/Usuario";
+import Usuario from "../../users/domain/User";
 import jwt, { Secret, JwtPayload } from "jsonwebtoken";
 
 const SECRET_KEY: Secret = "mySecretKey";
