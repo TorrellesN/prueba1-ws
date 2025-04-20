@@ -13,13 +13,13 @@ export default class UserUseCases {
         if (user.pwd) {
             user.pwd = hash(user.pwd)
         } else {
-            throw new Error ('Error 500')
+            throw new Error ('500')
         }
         return await this.userRepository.register(user);
     }
 
     async login (user: User) : Promise<UserAuth> {
-        if (!user.email || !user.pwd) throw new Error ('500');
+        if (!user.email || !user.pwd) throw new Error ('401');
 
         const userDB: User = await this.userRepository.login(user);
         

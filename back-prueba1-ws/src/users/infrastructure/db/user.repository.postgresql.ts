@@ -8,7 +8,6 @@ export default class UserRepositoryPostgreSQL implements UserRepository {
         console.log(user)
         const query = 'INSERT INTO users ("email", "pwd", "username") VALUES ($1, $2, $3) RETURNING *;';
         const rows: any[] = await executeQuery(query, [user.email, user.pwd, user.username]);
-        console.log(rows[0]);
         if (rows.length <= 0 || rows[0].email !== user.email) throw new Error('400');
         
         return "ok"; 
@@ -18,7 +17,7 @@ export default class UserRepositoryPostgreSQL implements UserRepository {
     async login(user: User): Promise<User> {
         const query = 'SELECT * FROM users WHERE email = $1;'
         const rows: any[] = await executeQuery(query, [user.email]);
-        if (rows.length <= 0) throw new Error('500');
+        if (rows.length <= 0) throw new Error('401');
         
         const {email, pwd, username, profile_img} = rows[0];
         const userDB: User = {

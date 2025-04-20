@@ -6,7 +6,7 @@ import Logo from "../components/sharedComponents/Logo";
 
 export default function AppLayout() {
   return (
-    <>
+    <div className="min-h-screen">
       <header className="bg-gray-800 py-5">
         <div className="max-w-screen-2xl mx-auto flex flex-col lg:flex-row justify-between items-center">
           <div className="w-64">
@@ -18,7 +18,7 @@ export default function AppLayout() {
         </div>
       </header>
 
-      <section className="max-w-screen-2xl mx-auto mt-10 p-5">
+      <section className="max-w-screen-2xl mt-10 p-5 mx-auto flex flex-col" > {/* mx-auto */}
         <Outlet />
       </section>
       <footer className="py-5">
@@ -30,6 +30,6 @@ export default function AppLayout() {
         pauseOnHover={false}
         pauseOnFocusLoss={false}
       />
-    </>
+    </div>
   );
 }

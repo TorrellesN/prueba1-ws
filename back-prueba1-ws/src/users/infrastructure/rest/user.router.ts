@@ -34,17 +34,20 @@ async function rtLogin (req: Request, res: Response) {
         const token: string =  createTokenUser(user);
         res.status(200).send({
             
-                
-                    username: user.username,
-                
+                    user: user,
                 token: token
-            
-            
             
         });
 
-    } catch (error) {
-        res.status(500).send({ message: String(error) });
+    } catch (err) {
+        const error = err as Error;
+    if (error.message === '401') {
+      res.status(401).json({ message : "No autorizado" });
+    } else if (error.message === '404') {
+        res.status(404).json({ message : "No se ha podido logear" });
+    } else {
+        res.status(500).json({ message : "Error desconocido" });
+    }
     }
 }
 
