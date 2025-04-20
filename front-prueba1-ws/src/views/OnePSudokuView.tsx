@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { SocketContext } from '../utilities/context/socketContext'
-import { UserContext } from '../utilities/context/ userContext';
+import { UserContext } from '../utilities/context/userContext';
 import { Link } from 'react-router-dom';
 
 export default function OnePSudokuView() {

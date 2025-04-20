@@ -1,7 +1,8 @@
 import { useContext } from "react";
 import { request } from "../../utilities/apiConfig/axios";
-import { UserLogedData, UserLogedSchema, UserLoginData, UserRegisterData } from "../../utilities/types";
-import { UserContext } from "../../utilities/context/ userContext";
+import { User, UserLogedData, UserLogedSchema, UserLoginData, UserRegisterData } from "../../utilities/types";
+import { UserContext } from "../../utilities/context/userContext";
+import { useAppStore } from "../../utilities/store/useAppStore";
 
 /* export async function loginUser (email: string, pwd: string) {
     console.log('entrando en funcion service')
@@ -35,7 +36,10 @@ type errorApi = {
   status: number,
   message: string
 }
-export async function loginService(user: UserLoginData): Promise<UserLogedData> {
+
+const setLoginProps = useAppStore(store => store.setLoginProps);
+
+export async function loginService(user: UserLoginData): Promise<User> {
   try {
 
     if (user.rememberme) {
@@ -52,7 +56,10 @@ export async function loginService(user: UserLoginData): Promise<UserLogedData> 
     const result = UserLogedSchema.safeParse(data)
 
     if (result.success) {
-      return result.data as UserLogedData;
+      const userLoged = result.data as UserLogedData;
+      setLoginProps(userLoged);
+
+      return userLoged.user;
     } else {
       throw { status: 404 }
     }
@@ -68,13 +75,41 @@ export async function loginService(user: UserLoginData): Promise<UserLogedData> 
 
       throw error;
     } else {
-      console.log('desde: ', error.message)
+      console.log('desd: ', error.message)
       throw error;
 
     }
   }
 };
 
-export function registerService(user: UserRegisterData): Promise<UserLoginData> {
-  return request("post", '/users/register', user);
-};   
+
+export async function registerService(user: UserRegisterData): Promise<User> {
+  try {
+    const {username, email, pwd} = user;
+
+    const data: { response: string } = await request("post", '/users/register', {username, email, pwd});
+    console.log('desde peticion service', {data});
+    if (data.response === 'ok') {
+      const userLoged = loginService({ email, pwd, rememberme: false })
+      return userLoged;
+    } else {
+      throw { status: 404 }
+    }
+
+  } catch (error: any) {
+
+    if (error.status === 401) {
+      console.log('desde servic: ', error.message)
+      error.message = "Los datos parecen ser incorrectos, inténtalo de nuevo más adelante.";
+      throw error;
+    } else if (error.status === 409) {
+      console.log('desde service: ', error.message)
+      error.message = "Ya existe un usuario con estas credenciales, prueba a introducir otro nombre de usuario o contraseña.";
+      throw error;
+    } else {
+      console.log('desde: ', error.message)
+      throw error;
+
+    }
+  }
+};

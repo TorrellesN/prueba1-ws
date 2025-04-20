@@ -17,12 +17,17 @@ async function rtRegister (req: Request, res: Response) {
         const { username, pwd, email } = req.body;
         
         const message: string = await userUseCases.register({email, pwd, username});
-        res.status(201).json({message: message});
+        res.status(201).json({message: 'ok'});
         
         /* res.status(200).send('response ok'); */
 
     } catch (error) {
-        res.status(500).json({ message: String(error) });
+        const err = error as Error;
+        if (err.message === '409') {
+            res.status(409).json({ message: 'Usuario ya existe'});
+        } else {
+            res.status(500).json({ message : "Error desconocido" });
+        }
     }
 }
 

@@ -6,11 +6,14 @@ export default class UserRepositoryPostgreSQL implements UserRepository {
     
     async register(user: User): Promise<string> {
         console.log(user)
-        const query = 'INSERT INTO users ("email", "pwd", "username") VALUES ($1, $2, $3) RETURNING *;';
+        try {const query = 'INSERT INTO users ("email", "pwd", "username") VALUES ($1, $2, $3) RETURNING *;';
         const rows: any[] = await executeQuery(query, [user.email, user.pwd, user.username]);
-        if (rows.length <= 0 || rows[0].email !== user.email) throw new Error('400');
+        if (rows.length <= 0 || rows[0].email !== user.email) throw new Error('503');
         
-        return "ok"; 
+        return "ok";
+    } catch(e) {
+        throw new Error('409')
+    }
     }
 
 

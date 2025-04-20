@@ -1,11 +1,11 @@
 import React from 'react'
-import { RegisterForm } from './RegisterForm';
+import { RegisterFormZod } from './RegisterFormZod';
 
 export default function RegisterView() {
     return (
         <main className=" ">
           <div className="container flex-1 py-4 md:py-8">
-            <RegisterForm />
+            <RegisterFormZod />
           </div>
         </main>
       );

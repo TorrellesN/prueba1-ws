@@ -1,13 +1,11 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { ErrorMessage } from "@hookform/error-message";
-import { UserLogedData, UserLoginData, UserLoginDataSchema, UserLoginDataWRememberSchema } from "../../utilities/types";
-import { useContext, useEffect, useState } from "react";
-import { UserContext } from "../../utilities/context/ userContext";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import { toast } from "react-toastify";
 import { loginService } from "../../services/api/authService";
 import { useApiRequest } from "../../utilities/hooks/useApiRequest";
-import { toast } from "react-toastify";
+import { User, UserLoginData, UserLoginDataWRememberSchema } from "../../utilities/types";
 
 // Definición de tipos
 /* type FormData = {
@@ -22,7 +20,7 @@ import { toast } from "react-toastify";
 }; */
 
 export function LoginForm() {
-  
+
   /* const [formData, setFormData] = useState<FormData>({
     email: '',
     password: '',
@@ -48,15 +46,15 @@ export function LoginForm() {
 
 
   // Validación con tipos
- /*  const validateForm = (): boolean => {
-    const newErrors: FormErrors = {};
-
-    if (!formData.email.includes('@')) newErrors.email = 'Email inválido';
-    if (formData.password.length < 8) newErrors.password = 'Mínimo 8 caracteres';
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  }; */
+  /*  const validateForm = (): boolean => {
+     const newErrors: FormErrors = {};
+ 
+     if (!formData.email.includes('@')) newErrors.email = 'Email inválido';
+     if (formData.password.length < 8) newErrors.password = 'Mínimo 8 caracteres';
+ 
+     setErrors(newErrors);
+     return Object.keys(newErrors).length === 0;
+   }; */
 
   // Manejo de eventos con tipos
   /* const handleSubmit = (e: FormEvent<HTMLFormElement>): void => {
@@ -74,7 +72,7 @@ export function LoginForm() {
     } */
 
 
-    /* setIsSubmitting(true); */
+  /* setIsSubmitting(true); */
 
 
   /* }; */
@@ -94,7 +92,7 @@ export function LoginForm() {
     }));
   } */
 
-    const { dataApi, loading, errorApi, execute } =  useApiRequest<UserLogedData>()
+  const { dataApi, loading, errorApi, execute } = useApiRequest<User>()
   const [defaultData] = useState<UserLoginData>(() => {
     const remembermeData = localStorage.getItem('userLogin');
     if (remembermeData) {
@@ -126,7 +124,7 @@ export function LoginForm() {
   const onSubmit = async (formData: UserLoginData) => {
     console.log("Datos válidos:", formData);
     /* await loginService(data); */
-    await execute( () => loginService(formData));
+    await execute(() => loginService(formData));
 
     if (errorApi) {
       console.error("Error during login:", errorApi);
@@ -137,16 +135,16 @@ export function LoginForm() {
       console.log("Login successful:", dataApi);
       // Perform any additional actions with the logged-in user data
     }
-    
+
     console.log('cual se ejecuta antes')
     console.log(errorApi, 'error api')
-   
+
     reset();
   };
 
   useEffect(() => {
     if (dataApi) {
-      toast.success('usuario registrado con éxito')
+      toast.success('Has iniciado sesión')
     }
     if (errorApi) (
       toast.error(errorApi)
@@ -154,7 +152,7 @@ export function LoginForm() {
   }, [dataApi, errorApi])
 
 
-  
+
   return (
     <section className="max-w-md mx-auto my-8 p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
@@ -170,15 +168,15 @@ export function LoginForm() {
             Correo electrónico
           </label>
           <input
-          {...register("email")}
+            {...register("email")}
             type="email"
             id="email"
             className={`w-full p-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md focus:border-blue-500`}
           />
-           <ErrorMessage
-          errors={errors}
-          name="email"
-          render={({ message }) => <p className="text-red-500 text-sm">{message}</p>}
+          <ErrorMessage
+            errors={errors}
+            name="email"
+            render={({ message }) => <p className="text-red-500 text-sm">{message}</p>}
           />
         </div>
 
@@ -196,9 +194,9 @@ export function LoginForm() {
             className={`w-full p-2 border ${errors.pwd ? 'border-red-500' : 'border-gray-300'} rounded-md focus:ring-blue-500 focus:border-blue-500`}
           />
           <ErrorMessage
-          errors={errors}
-          name="pwd"
-          render={({ message }) => <p className="text-red-500 text-sm">{message}</p>}
+            errors={errors}
+            name="pwd"
+            render={({ message }) => <p className="text-red-500 text-sm">{message}</p>}
           />
         </div>
 
