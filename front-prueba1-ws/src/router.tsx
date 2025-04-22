@@ -12,9 +12,8 @@ import { useAppStore } from "./utilities/store/useAppStore";
 
 export default function RouterApp() {
 
-    useInitializeAuth();
+    const {isInitialized} = useInitializeAuth();
 
-    const { isInitialized } = useAppStore();
     if (!isInitialized) {
         return <div>Cargando...</div>;
     }

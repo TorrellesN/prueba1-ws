@@ -6,6 +6,8 @@ import { toast } from 'react-toastify';
 import { registerService } from '../../services/api/authService';
 import { ErrorMessage } from '@hookform/error-message';
 import { useApiRequest } from '../../utilities/hooks/useApiRequest';
+import { useRegister } from '../../services/useCases/auth.useCases';
+import { useAppStore } from '../../utilities/store/useAppStore';
 
 // Definición de tipos
 /* type FormData = {
@@ -65,58 +67,55 @@ export function RegisterFormZod() {
       setErrors(prev => ({ ...prev, [name]: undefined }));
     }
   }; */
-  
-    const { dataApi, loading, errorApi, execute } = useApiRequest();
 
-    //const isSubmitDisabled = !isDirty || !isValid || Object.keys(errors).length > 0;
+  const { handleRegister, isAuthLoading, authError } = useRegister();
+  const token = useAppStore((state) => state.token);
 
-    
+  //const isSubmitDisabled = !isDirty || !isValid || Object.keys(errors).length > 0;
+
+
   const {
-      register,
-      handleSubmit,
-      setValue,
-      formState: { errors, isValid, isDirty },
-      reset
-    } = useForm<UserRegisterData>({
-      resolver: zodResolver(UserRegisterDataSchema),
-      defaultValues: {
-        username: '',
-        email: '',
-        pwd: '',
-        pwdRep: ''
-      }
-    })
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors, isValid, isDirty },
+    reset
+  } = useForm<UserRegisterData>({
+    resolver: zodResolver(UserRegisterDataSchema),
+    defaultValues: {
+      username: '',
+      email: '',
+      pwd: '',
+      pwdRep: ''
+    }
+  })
 
-    /* const isSubmitDisabled = useMemo(() => !isValid || Object.keys(errors).length > 0, [isDirty, isValid]) */
-      const onSubmit = async (formData: UserRegisterData) => {
-        console.log("Datos válidos:", formData);
-        /* await loginService(data); */
-        await execute(() => registerService(formData));
-    
-        if (errorApi) {
-          console.error("Error during login:", errorApi);
-          return;
-        }
-    
-        if (dataApi) {
-          console.log("Login successful:", dataApi);
-          // Perform any additional actions with the logged-in user data
-        }
-    
-        console.log('cual se ejecuta antes')
-        console.log(errorApi, 'error api')
-    
-        reset();
-      };
+  /* const isSubmitDisabled = useMemo(() => !isValid || Object.keys(errors).length > 0, [isDirty, isValid]) */
+  const onSubmit = async (formData: UserRegisterData) => {
+    console.log("Datos válidos:", formData);
+    await handleRegister(formData);
 
-    useEffect(() => {
-        if (dataApi) {
-          toast.success('usuario registrado con éxito')
-        }
-        if (errorApi) (
-          toast.error(errorApi)
-        )
-      }, [dataApi, errorApi])
+    if (authError) {
+      console.error("Error during register:", authError);
+      return;
+    }
+
+
+    console.log('cual se ejecuta antes')
+    console.log(authError, 'error api')
+
+    reset();
+  };
+
+
+  useEffect(() => {
+    if (!isAuthLoading && token) {
+      toast.success('Usuario registrado con éxito')
+    }
+    if (!isAuthLoading && authError) (
+      toast.error(authError)
+    )
+  }, [isAuthLoading, authError])
 
 
   return (
@@ -124,7 +123,7 @@ export function RegisterFormZod() {
       <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">
         Crear cuenta
       </h2>
-      
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
         {/* grupo título y nombre */}
         <div>
@@ -201,9 +200,9 @@ export function RegisterFormZod() {
         <button
           type="submit"
           /* disabled={isSubmitDisabled} */
-          className={`w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+          className={`w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors ${isAuthLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
         >
-          {loading ? (
+          {isAuthLoading ? (
             <span className="flex items-center justify-center">
               <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

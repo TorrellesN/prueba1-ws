@@ -1,14 +1,13 @@
 import { StateCreator } from "zustand";
 import { User, UserLogedData } from "../types";
-import { useJwt } from "react-jwt";
 
 export type AuthStateType = {
     user: User,
     token: string | null,
-    isInitialized: boolean,
-    setLoginProps: (userLoged: UserLogedData) => void,
+    setLoginState: (userLoged: UserLogedData) => void,
     logout: () => void,
-    initializeAuth: () => Promise<void>
+    setToken: (newToken: string) => void
+    
     // setToken: React.Dispatch<React.SetStateAction<string | null>>,
     // setUser: React.Dispatch<React.SetStateAction<User>>
 /*     loginFake: (name: string) => void,
@@ -22,7 +21,7 @@ const userInitialState = {
 }
 
 const updateToken = (callbackReEvaluate: (token: string) => void, newToken: string) => {
-    callbackReEvaluate(newToken); // decodedToken and isExpired will be updated
+    callbackReEvaluate(newToken); // actualiza las props decodedToken y isExpired
 }
 
 
@@ -30,23 +29,55 @@ const updateToken = (callbackReEvaluate: (token: string) => void, newToken: stri
 export const createUserSlice : StateCreator<AuthStateType> = (set, get, api) => ({
 user: userInitialState,
 token: null,
-isInitialized: false,
 
-setLoginProps: (userLoged : UserLogedData) => {
-    set((state) => ({
+
+
+setLoginState:  (userLoged : UserLogedData) => {
+  
+  set((state) => ({
         token: userLoged.token,
         user: userLoged.user
     }))
+    localStorage.setItem('token', userLoged.token)
+
 },
+
+
+/* login: async(userLoged: UserLogedData) => {
+    
+
+    const { dataApi, errorApi, execute } = useApiRequest<UserLogedData>();
+    await execute(() => loginService(user));
+    if (dataApi) {
+      set((state) => ({
+        token: dataApi.token,
+        user: dataApi.user
+    }))
+    } else if (errorApi) {
+      set ({authError: errorApi})
+    }
+
+
+    set({isAuthLoading: false})
+
+  }, */
+
 
 logout: () => {
     set(({
         token: '',
         user: userInitialState
     }))
+    localStorage.removeItem('token')
 },
-initializeAuth: async () => {
-    const storedToken = localStorage.getItem('authToken');
+
+setToken: (newToken: string) => {
+  set({ token: newToken });
+},
+
+
+/* initializeAuth: async () => {
+    const storedToken = localStorage.getItem('token');
     
     if (!storedToken) {
       set({ isInitialized: true });
@@ -54,6 +85,7 @@ initializeAuth: async () => {
     }
 
     const { decodedToken, isExpired, reEvaluateToken } = useJwt(storedToken);
+    console.log(decodedToken)
 
     if (!isExpired && decodedToken) {
       const decodedUser = decodedToken as User;
@@ -76,7 +108,7 @@ initializeAuth: async () => {
           isInitialized: true
         });
       } catch (error) {
-        localStorage.removeItem('authToken');
+        localStorage.removeItem('token');
         set({
           token: null,
           user: userInitialState,
@@ -84,8 +116,8 @@ initializeAuth: async () => {
         });
       }
     }
-  }
-})
+  }*/
+}) 
 
 
 

@@ -6,6 +6,8 @@ import { toast } from "react-toastify";
 import { loginService } from "../../services/api/authService";
 import { useApiRequest } from "../../utilities/hooks/useApiRequest";
 import { User, UserLoginData, UserLoginDataWRememberSchema } from "../../utilities/types";
+import { useAppStore } from "../../utilities/store/useAppStore";
+import { useLogin } from "../../services/useCases/auth.useCases";
 
 // Definición de tipos
 /* type FormData = {
@@ -92,7 +94,10 @@ export function LoginForm() {
     }));
   } */
 
-  const { dataApi, loading, errorApi, execute } = useApiRequest<User>()
+  /* const { dataApi, loading, errorApi, execute } = useApiRequest<User>() */
+  const { handleLogin, isAuthLoading, authError } = useLogin();
+  const  token = useAppStore((state) =>  state.token );
+
   const [defaultData] = useState<UserLoginData>(() => {
     const remembermeData = localStorage.getItem('userLogin');
     if (remembermeData) {
@@ -123,33 +128,32 @@ export function LoginForm() {
 
   const onSubmit = async (formData: UserLoginData) => {
     console.log("Datos válidos:", formData);
-    /* await loginService(data); */
-    await execute(() => loginService(formData));
+    await handleLogin(formData)
 
-    if (errorApi) {
-      console.error("Error during login:", errorApi);
+    if (authError) {
+      console.error("Error during login:", authError);
       return;
     }
 
-    if (dataApi) {
+    /* if (dataApi) {
       console.log("Login successful:", dataApi);
-      // Perform any additional actions with the logged-in user data
-    }
+      Perform any additional actions with the logged-in user data
+    } */
 
     console.log('cual se ejecuta antes')
-    console.log(errorApi, 'error api')
+     console.log(authError, 'error api')
 
     reset();
   };
 
   useEffect(() => {
-    if (dataApi) {
+    if (!isAuthLoading && token) {
       toast.success('Has iniciado sesión')
     }
-    if (errorApi) (
-      toast.error(errorApi)
+    if (!isAuthLoading && authError) (
+      toast.error(authError)
     )
-  }, [dataApi, errorApi])
+  }, [isAuthLoading, authError])
 
 
 
@@ -214,9 +218,9 @@ export function LoginForm() {
         <button
           type="submit"
           /* disabled={isSubmitting} */
-          className={`w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors ${loading ? 'opacity-70 cursor-not-allowed' : ''}`}
+          className={`w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-md transition-colors ${isAuthLoading ? 'opacity-70 cursor-not-allowed' : ''}`} //${isAuthLoading ? 'opacity-70 cursor-not-allowed' : ''}
         >
-          {loading ? (
+          {isAuthLoading ? (
             <span className="flex items-center justify-center">
               <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>

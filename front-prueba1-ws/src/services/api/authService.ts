@@ -37,19 +37,10 @@ type errorApi = {
   message: string
 }
 
-const setLoginProps = useAppStore(store => store.setLoginProps);
+/* const setLoginProps = useAppStore(store => store.setLoginProps); */
 
-export async function loginService(user: UserLoginData): Promise<User> {
+export async function loginService(user: UserLoginData): Promise<UserLogedData> {
   try {
-
-    if (user.rememberme) {
-      localStorage.setItem('userLogin', JSON.stringify({
-        email: user.email,
-        pwd: user.pwd
-      }))
-    } else {
-      localStorage.removeItem('userLogin')
-    }
 
     const data = await request("post", '/users/login', { email: user.email, pwd: user.pwd });
     console.log('desde peticion service', data);
@@ -57,9 +48,9 @@ export async function loginService(user: UserLoginData): Promise<User> {
 
     if (result.success) {
       const userLoged = result.data as UserLogedData;
-      setLoginProps(userLoged);
 
-      return userLoged.user;
+      return userLoged;
+    
     } else {
       throw { status: 404 }
     }
@@ -83,17 +74,16 @@ export async function loginService(user: UserLoginData): Promise<User> {
 };
 
 
-export async function registerService(user: UserRegisterData): Promise<User> {
+export async function registerService(user: UserRegisterData): Promise<UserLoginData> {
   try {
     const {username, email, pwd} = user;
 
-    const data: { response: string } = await request("post", '/users/register', {username, email, pwd});
+    const data: { message: string } = await request("post", '/users/register', {username, email, pwd});
     console.log('desde peticion service', {data});
-    if (data.response === 'ok') {
-      const userLoged = loginService({ email, pwd, rememberme: false })
-      return userLoged;
+    if (data.message === 'ok') {
+      return {email, pwd, rememberme: false};
     } else {
-      throw { status: 404 }
+      throw { status: 404 , message: "Algo raro pasa aquí"}
     }
 
   } catch (error: any) {
