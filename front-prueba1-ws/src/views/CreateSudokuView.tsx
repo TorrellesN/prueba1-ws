@@ -1,25 +1,47 @@
-import { useContext, useState } from "react"
+import { useContext, useEffect, useMemo, useState } from "react"
 import { SocketContext } from "../utilities/context/socketContext"
 import { Listbox } from "@headlessui/react"
 import { useNavigate } from "react-router-dom"
+import { Difficulty, diffOptions } from "../utilities/types";
+import { useAppStore } from "../utilities/store/useAppStore";
 
 export default function CreateSudokuView() {
 
     const navigate = useNavigate();
+    const [difSelected, setDifSelected] = useState<string>("");
+    const difficulty = useMemo<Difficulty>(() => (Object.entries(diffOptions).find(([, val]) => val === difSelected)?.[0]) as Difficulty, [difSelected])
+    const setDifficulty = useAppStore( state => state.setDifficulty );
+    const {socket, connectSocket, online} = useContext(SocketContext);
     
-    const options = [
-        { id: 1, name: 'Fácil' },
-        { id: 2, name: 'Medio' },
-        { id: 3, name: 'Difícil' },
-      ]
-    const [difSelected, setDifSelected] = useState<string>('');
+    const handleSudokuCreate = () => {
+      socket.emit('request-sudoku', "pve", difficulty);
+      console.log('evento emitido')
+      setDifficulty(difficulty);
+    }
+
+    useEffect(() => {
+      connectSocket();
+      socket.on('generate-pve-sudoku', (data) => {
+        console.log('recibidoooo')
+        navigate(`/pve/sudoku`)
+      })
+      
+      return () => {
+        socket.off('generate-pve-sudoku')
+      }
+      
+    }, [])
+
+
+
+
 
 
   return (
     <>
     <h1 className="text-5xl font-black">Prueba</h1>
     <p className="text-2xl font-light text-gray-500 mt-5">
-      Introduce tu nombre de usuario
+      Define la dificultad para tu sudoku:
     </p>
 
     
@@ -35,10 +57,10 @@ export default function CreateSudokuView() {
           {open && (
             <Listbox.Options className="absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
               
-              {options.map((option) => (
+              {Object.entries(diffOptions).map(([key, option]) => (
               <Listbox.Option
-                key={option.id}
-                value={option.name}
+                key={key}
+                value={option}
                 className={({ active }) =>
                   `${active ? 'text-amber-900 bg-amber-100' : 'text-gray-900'} cursor-default select-none relative py-2 pl-10 pr-4`
                 }
@@ -46,7 +68,7 @@ export default function CreateSudokuView() {
                 {({ selected }) => (
                   <>
                     <span className={`${selected ? 'font-medium' : 'font-normal'} block truncate`}>
-                      {option.name}
+                      {option}
                     </span>
                     {selected && (
                       <span className="absolute inset-y-0 left-0 flex items-center pl-3 text-amber-600">
@@ -73,7 +95,7 @@ export default function CreateSudokuView() {
       <button
         className="bg-purple-400 hover:bg-purple-600 px-10 py-3 text-white text-xl font-bold cursor-pointer transition-colors"
         
-        onClick = {() => navigate('/oneplayer/sudoku')}
+        onClick = {handleSudokuCreate}
       >
         Generar sudoku
       </button>
@@ -88,4 +110,8 @@ export default function CreateSudokuView() {
     
   </>
   )
+}
+
+function getKeyByValue(): Difficulty {
+  throw new Error("Function not implemented.");
 }

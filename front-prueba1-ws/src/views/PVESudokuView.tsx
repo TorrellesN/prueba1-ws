@@ -2,18 +2,22 @@ import React, { useContext, useEffect, useState } from 'react'
 import { SocketContext } from '../utilities/context/socketContext'
 import { UserContext } from '../utilities/context/userContext';
 import { Link } from 'react-router-dom';
+import { useAppStore } from '../utilities/store/useAppStore';
 
-export default function OnePSudokuView() {
+export default function PVESudokuView() {
   
     const {socket, connectSocket, disconnectSocket, online} = useContext(SocketContext);
-    const {user} = useContext(UserContext);
+    const {user} = useAppStore(state => state)
 
     useEffect(() => {
         
         if (user.username) {
             
             connectSocket();
-            socket.on('connect', () => console.log('conectado con ', socket.id))
+            socket.on('connect', () => 
+              console.log('conectado con ', socket.id)
+
+          )
 
         } else {
             disconnectSocket();

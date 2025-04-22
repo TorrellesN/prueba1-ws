@@ -6,7 +6,7 @@ import { useInitializeAuth } from "./utilities/hooks/useInitializeAuth";
 import CreateSudokuView from "./views/CreateSudokuView";
 import HomeView from "./views/HomeView";
 import LoginView from "./views/loginView/LoginView";
-import OnePSudokuView from "./views/OnePSudokuView";
+import OnePSudokuView from "./views/PVESudokuView";
 import RegisterView from "./views/registerView/RegisterView";
 import { useAppStore } from "./utilities/store/useAppStore";
 import AuthRoutes from "./routes/AuthRoutes";
@@ -44,8 +44,8 @@ export default function RouterApp() {
                         {/* Rutas autenticadas (solo accesibles con login) */}
                         <Route element={<AuthRoutes isAuth={isAuth} redirectTo="/home" />}>
                             <Route element={<UserView />} path="/" />
-                            <Route path="/oneplayer/create" element={<CreateSudokuView />} />
-                            <Route path="/oneplayer/sudoku" element={<OnePSudokuView />} />
+                            <Route path="/pve/create" element={<CreateSudokuView />} />
+                            <Route path="/pve/sudoku" element={<OnePSudokuView />} />
                         </Route>
 
                         {/* ruta pública por defecto */}

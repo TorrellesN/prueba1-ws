@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState } from "react"
 import { io } from "socket.io-client";
 import { useAppStore } from "../store/useAppStore";
 
+
+//! ESTE HOOK SOLO SE UTILIZA A TRAVES DE SOCKET CONTEXT
 export const useSocket = (serverPath: string) => {
     const token = useAppStore((state) => state.token);
     const [online, setOnline] = useState(false);
@@ -18,9 +20,10 @@ export const useSocket = (serverPath: string) => {
     const connectSocket = useCallback(() => {
         //const token = localStorage.getItem('token');
         //if ( auth.logged )...
+        if (!token) return;
        socket.current.connect();
 
-    }, [])
+    }, [socket])
 
     const disconnectSocket = useCallback( () => {
         socket.current.disconnect();
@@ -38,15 +41,15 @@ export const useSocket = (serverPath: string) => {
         socket.current.on('disconnect', () => setOnline( false ));
     }, [ socket ])
 
-    //solo para comprobar token
+    //para logout
     useEffect(() => {
-        if(token) {
+        /* if(token) {
             connectSocket();
-        }
+        } */
         if(!token) {
             disconnectSocket();
         }
-    }, [token, disconnectSocket, connectSocket])
+    }, [token, disconnectSocket])
 
     
     return {

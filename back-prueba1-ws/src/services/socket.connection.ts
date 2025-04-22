@@ -12,6 +12,10 @@ export default function configureSocket(io: Server) {
         }
         const user = userAuth as UserAuth;
 
+        socket.on('request-sudoku', (gameMode, difficulty) => {
+            console.log(gameMode, difficulty)
+        } )
+
 
         socket.conn.on("upgrade", (transport) => {
             console.log(`Socket actualizado a: ${transport.name}`); // Debería mostrar "websocket"

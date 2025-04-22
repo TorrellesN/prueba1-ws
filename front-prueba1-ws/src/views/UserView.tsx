@@ -15,7 +15,7 @@ export default function HomeView() {
 
 
   const handleRedirectEnter = () => {
-    navigate('/oneplayer/create');
+    navigate('/pve/create');
   }
 
   return (
@@ -38,7 +38,7 @@ export default function HomeView() {
         <p className="text-center py-20">No hay sudokus aún {''}
           <Link
             className="text-fuchsia-500 font-bold"
-            to='/projects/create'
+            to='/pve/create'
           >Crear sudokus</Link>
         </p>
         <button className='button bg-amber-100 cursor-pointer'

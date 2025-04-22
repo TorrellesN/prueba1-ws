@@ -1,41 +1,12 @@
-import { useEffect, useState } from "react";
-import { ApiState } from "../types";
+import { useState } from "react";
 
 
 
-/* export function useApiRequest<T>(requestFn: () => Promise<T>) {
-  const [state, setState] = useState<ApiState<T>>({
-    data: null,
-    loading: true,
-    error: null,
-  });
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const fetchData = async () => {
-      try {
-        const data = await requestFn();
-        if (isMounted) setState({ data, loading: false, error: null });
-      } catch (err: any) {
-        if (isMounted)
-          setState({
-            data: null,
-            loading: false,
-            error: err.message || "",
-          });
-      }
-    };
-
-    fetchData();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [requestFn]);
-
-  return state;
-} */
+  export type ApiState<T> = {
+    data: T | null;
+    loading: boolean;
+    error: string | null;
+  }
 
 
 //hook personalizado con variables de loading y error. Se crea una instancia diferente de él cada vez que se usa en un comp

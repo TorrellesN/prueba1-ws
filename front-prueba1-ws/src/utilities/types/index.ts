@@ -1,10 +1,10 @@
-import {z} from 'zod'
+import { z } from 'zod'
 
 export const UserRegisterDataSchema = z.object({
-    username: z.string().min(3, "El nombre de usuario debe tener más de 3 caracteres").max(20, "El nombre de usuario no puede tener más de 20 caracteres"),
-    email: z.string().min(1, "Campo requerido").email("Email no válido"),
-    pwd: z.string().min(8, "Debe tener mínimo 8 caracteres"),
-    pwdRep: z.string()
+  username: z.string().min(3, "El nombre de usuario debe tener más de 3 caracteres").max(20, "El nombre de usuario no puede tener más de 20 caracteres"),
+  email: z.string().min(1, "Campo requerido").email("Email no válido"),
+  pwd: z.string().min(8, "Debe tener mínimo 8 caracteres"),
+  pwdRep: z.string()
 }).refine(data => data.pwd === data.pwdRep, {
   message: "Las contraseñas no coinciden",
   path: ["pwdRep"]
@@ -17,32 +17,36 @@ export const UserLoginDataSchema = z.object({
 })
 
 export const UserLoginDataWRememberSchema = UserLoginDataSchema.extend({
-    rememberme: z.boolean(),
-  });
+  rememberme: z.boolean(),
+});
 
-  export const UserSchema = z.object({
-    username: z.string(),
-        email: z.string(),
-        profileImg: z.string()
-    
-  })
+export const UserSchema = z.object({
+  username: z.string(),
+  email: z.string(),
+  profileImg: z.string()
+
+})
 
 export const UserLogedSchema = z.object({
-    user: UserSchema,
-    token: z.string()}) 
+  user: UserSchema,
+  token: z.string()
+})
 
-  export type UserLoginData = z.infer<typeof UserLoginDataWRememberSchema>;
 
+export type UserLoginData = z.infer<typeof UserLoginDataWRememberSchema>;
 export type UserRegisterData = z.infer<typeof UserRegisterDataSchema>;
 export type UserLogedData = z.infer<typeof UserLogedSchema>;
 export type User = z.infer<typeof UserSchema>;
-/* export type UserLoginData = z.infer<typeof userLoginDataSchema>; */
-/* export type UserLoginRememberData = UserLoginData & { rememberme: boolean }; */
 
 
 
-export type ApiState<T> = {
-  data: T | null;
-  loading: boolean;
-  error: string | null;
+export type Difficulty = "easy" | "medium" | "hard";
+export const diffOptions: Record<Difficulty, string> = {
+  easy: "Fácil",
+  medium: "Medio",
+  hard: "Difícil",
+};
+
+function getKeyByValue(obj: Record<string, string>, value: string): string | undefined {
+  return Object.entries(obj).find(([key, val]) => val === value)?.[0];
 }

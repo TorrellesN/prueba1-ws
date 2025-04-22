@@ -2,6 +2,7 @@ import React, { createContext, useCallback, useEffect, useState } from "react";
 import { useJwt } from "react-jwt";
 import { User } from "../types";
 
+//!ESTADO DE USER PASADO A ZUSTAND
 type UserContextProps = {
     user: User,
     token: string | null,
