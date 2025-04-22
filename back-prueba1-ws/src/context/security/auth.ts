@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import Usuario from "../../users/domain/User";
+import Usuario, { UserAuth } from "../../users/domain/User";
 import jwt, { Secret, JwtPayload } from "jsonwebtoken";
 import User from "../../users/domain/User";
 
@@ -74,4 +74,23 @@ const isUser = (req: Request, res: Response, next: NextFunction) => {
 
 } */
 
-export { createTokenUser, isAuth };
+  const decryptJWT = (token: string): UserAuth | {response: string} => {
+    try {
+      if (token) {
+        const decoded: any = jwt.verify(token, SECRET_KEY);
+        const userAuth: UserAuth = {
+          username: decoded.username,
+          email: decoded.email,
+          profileImg: decoded.profileImg,
+        }
+          
+        return userAuth
+      } else {
+      return {response: 'Token no válido'}
+      }
+    } catch (err) {
+      return {response: 'Token no válido'}
+    }
+  };
+
+export { createTokenUser, isAuth, decryptJWT };

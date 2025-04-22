@@ -3,10 +3,14 @@ import { SocketContext } from '../utilities/context/socketContext'
 import { useContext, useState } from 'react';
 import { UserContext } from '../utilities/context/userContext';
 import { Button, CloseButton, PopoverButton } from '@headlessui/react';
+import { useAppStore } from '../utilities/store/useAppStore';
 
 export default function HomeView() {
 
+  const {online, connectSocket} = useContext(SocketContext);
+  const [name, setName] = useState('');
   const navigate = useNavigate();
+  const user = useAppStore(state => state.user)
 
 
 
@@ -18,7 +22,7 @@ export default function HomeView() {
     <>
     <h1 className="text-5xl font-black">Prueba</h1>
     <p className="text-2xl font-light text-gray-500 mt-5">
-      Bienvenido a sudo k.o.
+      Bienvenido, {user.username || ''}
     </p>
     
 
@@ -31,17 +35,18 @@ export default function HomeView() {
       </button>
     </nav>
     
-        <p className="text-center py-20">No hay sudokus aún {''}</p>
+        <p className="text-center py-20">No hay sudokus aún {''}
           <Link
             className="text-fuchsia-500 font-bold"
-            to='/auth/login'
-          >Login</Link>
-          <Link
-            className="text-fuchsia-500 font-bold"
-            to='/auth/register'
-          >Registrarse</Link>
-        
-        
+            to='/projects/create'
+          >Crear sudokus</Link>
+        </p>
+        <button className='button bg-amber-100 cursor-pointer'
+        onClick={connectSocket}
+        >{online ? 'Online' : 'Offline'}</button>
+      
+
+    
   </>
   )
 }

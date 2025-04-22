@@ -1,17 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { io } from "socket.io-client";
+import { useAppStore } from "../store/useAppStore";
 
 export const useSocket = (serverPath: string) => {
+    const token = useAppStore((state) => state.token);
+    const [online, setOnline] = useState(false);
 
     const socket = useRef(io(serverPath, {
         transports: ['websocket'],
         autoConnect: false,
         //forceNew: true,
-        /* query: {
-            'x-token': token
-        } */
+        query: {
+            authToken: token
+        }
     }));
-    const [online, setOnline] = useState(false);
 
     const connectSocket = useCallback(() => {
         //const token = localStorage.getItem('token');
@@ -35,6 +37,16 @@ export const useSocket = (serverPath: string) => {
     useEffect(() => {
         socket.current.on('disconnect', () => setOnline( false ));
     }, [ socket ])
+
+    //solo para comprobar token
+    useEffect(() => {
+        if(token) {
+            connectSocket();
+        }
+        if(!token) {
+            disconnectSocket();
+        }
+    }, [token, disconnectSocket, connectSocket])
 
     
     return {
