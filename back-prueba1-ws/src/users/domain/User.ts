@@ -6,6 +6,5 @@ export default interface User {
 }
 
 export type UserAuth = Pick<User, 'username' | 'profileImg' | 'email'>;
-export type Player = Pick<User, 'username' | 'profileImg' | 'email'> & {rol: RolNumber};
-export type RolNumber = 0 | 1 | 2 | 3;
+
 

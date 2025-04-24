@@ -1,29 +1,14 @@
-import { Player } from "../../users/domain/User";
+import { Cell, Difficulty, FormattedSudokuBoard, SudokuBoard, SudokuBoardSolved } from "./Sudoku";
 
-export default interface Sudoku {
-    id: string,
-    currentSudoku: {rol: number, number: number}[][],
-    solvedSudoku: [][],
-    difficulty: "easy" | "medium" | "hard",
-    status: "new" | "started" | "finished",
-    creationDate: Date,
-    players: [
-        player: Player,
-        playerDraft: [][]
-    ]
-}
 
-type Cell = { row: number; col: number; value: number | null };
-type SudokuBoard = (number | null)[][];
-type FormattedCell = { rol: number; number: number } | null;
-type FormattedSudokuBoard = FormattedCell[][];
-type SudokuResult = {
-  currentSudoku: FormattedSudokuBoard;
-  solvedSudoku: SudokuBoard;
+
+export type SudokuResult = {
+  current: FormattedSudokuBoard;
+  solved: SudokuBoardSolved;
 };
 
 // Define niveles de dificultad por cantidad de celdas a eliminar
-enum Difficulty {
+enum DifficultyCells {
   Easy = 35,    // Elimina ~35 celdas (deja ~46 números)
   Medium = 45,  // Elimina ~45 celdas (deja ~36 números)
   Hard = 55     // Elimina ~55 celdas (deja ~26 números)
@@ -32,7 +17,7 @@ enum Difficulty {
 /**
  * Genera un sudoku según el nivel de dificultad especificado
  */
-function generateSudoku(difficulty: 'easy' | 'medium' | 'hard'): SudokuResult {
+function generateSudoku(difficulty: Difficulty): SudokuResult {
   // Límite máximo de intentos para generar un sudoku válido
   const MAX_ATTEMPTS = 10;
   let attempts = 0;
@@ -66,16 +51,16 @@ function generateSudoku(difficulty: 'easy' | 'medium' | 'hard'): SudokuResult {
   let cellsToRemove: number;
   switch (difficulty) {
     case 'easy':
-      cellsToRemove = Difficulty.Easy;
+      cellsToRemove = DifficultyCells.Easy;
       break;
     case 'medium':
-      cellsToRemove = Difficulty.Medium;
+      cellsToRemove = DifficultyCells.Medium;
       break;
     case 'hard':
-      cellsToRemove = Difficulty.Hard;
+      cellsToRemove = DifficultyCells.Hard;
       break;
     default:
-      cellsToRemove = Difficulty.Medium;
+      cellsToRemove = DifficultyCells.Medium;
   }
   
   // Reiniciar contador de intentos
@@ -92,7 +77,7 @@ function generateSudoku(difficulty: 'easy' | 'medium' | 'hard'): SudokuResult {
     } catch (error) {
       console.warn("Error al crear puzzle con dificultad solicitada:", error);
       // Si falla con la dificultad actual, reducir la dificultad
-      if (cellsToRemove > Difficulty.Easy) {
+      if (cellsToRemove > DifficultyCells.Easy) {
         cellsToRemove -= 5;
         console.log(`Reduciendo dificultad, intentando con ${cellsToRemove} celdas eliminadas`);
       }
@@ -111,8 +96,8 @@ function generateSudoku(difficulty: 'easy' | 'medium' | 'hard'): SudokuResult {
   const formattedCurrentBoard = formatCurrentSudoku(currentBoard);
   
   return {
-    currentSudoku: formattedCurrentBoard,
-    solvedSudoku: solvedBoard
+    current: formattedCurrentBoard,
+    solved: solvedBoard as SudokuBoardSolved
   };
 }
 
@@ -465,7 +450,7 @@ function createSudokuFast(): SudokuBoard {
  * Método principal para generar un sudoku
  * Implementa manejo de errores para garantizar que siempre devuelva un resultado
  */
-export function createSudokuGame(difficulty: 'easy' | 'medium' | 'hard'): SudokuResult {
+export function createSudokuGame(difficulty: Difficulty): SudokuResult {
   try {
     return generateSudoku(difficulty);
   } catch (error) {
@@ -486,8 +471,8 @@ export function createSudokuGame(difficulty: 'easy' | 'medium' | 'hard'): Sudoku
     const simpleBoard = createSimplePuzzle(emptyBoard, 10);
     
     return {
-      currentSudoku: formatCurrentSudoku(simpleBoard),
-      solvedSudoku: emptyBoard
+      current: formatCurrentSudoku(simpleBoard),
+      solved: emptyBoard as SudokuBoardSolved
     };
   }
 }

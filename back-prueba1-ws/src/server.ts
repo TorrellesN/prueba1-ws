@@ -7,6 +7,9 @@ import { createMongoConnectionDefault } from './context/db/mongodb.connection';
 import { corsConfig } from './context/security/cors.config';
 import configureAppRoutes from './services/app.routes';
 import configureSocket from './services/socket.connection';
+import SudokuUseCases from './sudokus/application/sudoku.useCases';
+import SudokuRepositoryMongoDB from './sudokus/infrastructure/bd/sudoku.repository.mongodb';
+import { Cell, SudokuPVE } from './sudokus/domain/Sudoku';
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("../doc/swagger.json");
 
@@ -33,5 +36,16 @@ const io = new Server(server, {
 });
 
 configureSocket(io);
+
+
+
+
+
+/* const sudo: SudokuUseCases = new SudokuUseCases(new SudokuRepositoryMongoDB);
+const sudokao = sudo.createPve({username: 'papa',email: '',profileImg: ''}, 'hard'); */
+
+
+
+
 
 export default server;

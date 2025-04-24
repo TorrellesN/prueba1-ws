@@ -7,7 +7,7 @@ import { exit } from 'node:process';
 
 dotenv.config();
 
-const url = process.env.MONGO_URL || "mongodb://localhost:27017";
+const url = process.env.MONGO_URL || "mongodb://admin:admin123@localhost:27017";
 const dbName = process.env.MONGO_DB_NAME || "prueba";
 const collections: { [key: string]: Collection } = {};
 
@@ -37,8 +37,8 @@ async function createMongoConnection() {
 }
 
 const addCollections = (db: Db) => {
-  collections.users = db.collection(
-    process.env.MONGO_DB_COLLECTION_USERS || "tabla1"
+  collections.pveSudoku = db.collection(
+    process.env.MONGO_DB_COLLECTION_PVESUDOKU || "pvesudoku"
   );
 
 };

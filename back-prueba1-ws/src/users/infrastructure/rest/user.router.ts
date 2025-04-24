@@ -4,13 +4,17 @@ import { createTokenUser, isAuth } from "../../../context/security/auth";
 import UserUseCases from "../../application/user.useCases";
 import UserRepositoryPostgreSQL from "../db/user.repository.postgresql";
 import User from "../../domain/User";
+import SudokuUseCases from "../../../sudokus/application/sudoku.useCases";
+import SudokuRepositoryMongoDB from "../../../sudokus/infrastructure/bd/sudoku.repository.mongodb";
 
 const router = express.Router();
 const userUseCases: UserUseCases = new UserUseCases(new UserRepositoryPostgreSQL)
+const sudokuUseCases: SudokuUseCases = new SudokuUseCases(new SudokuRepositoryMongoDB)
 
 router.post('/register', rtRegister);
 router.post('/login', rtLogin);
 router.get('/private', isAuth, rtPrivate);
+router.post('/public', rtPruebas);
 
 async function rtRegister (req: Request, res: Response) {
     try {
@@ -67,6 +71,17 @@ async function rtPrivate (req: Request, res: Response) {
 
     } catch (error) {
         res.status(500).send({ message: String(error) });
+    }
+}
+
+async function rtPruebas (req: Request, res: Response) {
+    try {
+        const {username, email, profileImg, difficulty} = req.body;
+        const generatedSudoku = await sudokuUseCases.createPve({username, email, profileImg}, difficulty);
+        res.send(generatedSudoku);
+    } catch (error: any) {
+    
+        res.send(error.message);
     }
 }
 

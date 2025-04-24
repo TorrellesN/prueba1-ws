@@ -1,7 +1,10 @@
-import { Player } from "../../users/domain/User";
+import { newParticipant, Participant, Player, RolNumber } from '../../users/domain/Player';
+import User from '../../users/domain/User';
+import { createSudokuGame } from './sudokuGenerator';
 
-export default interface Sudoku {
-    id: string,
+
+/* export default interface s {
+    ids: string,
     currentSudoku: [][],
     solvedSudoku: [][],
     difficulty: Difficulty,
@@ -11,11 +14,56 @@ export default interface Sudoku {
         player: Player,
         playerDraft: [][]
     ]
+} */
+
+export type SudokuPVP = {
+    id?: string,
+    current: FormattedSudokuBoard,
+    solved: SudokuBoardSolved,
+    difficulty: Difficulty,
+    status: SudokuStatus,
+    creationDate?: Date,
+    participants: Participant[]
 }
 
+export type SudokuPVE = Omit<SudokuPVP, 'participants'> & {participant: Participant};
+
+type Cell = { row: number; col: number; value: number | null };
+type SudokuBoard = (number | null)[][];
+type SudokuBoardSolved = number[][];
+type FormattedCell = { rol: RolNumber; number: number } | null;
+type FormattedSudokuBoard = FormattedCell[][];
+type CellDraft = { row: number; col: number; value: [] };
+
+
+type Difficulty = "easy" | "medium" | "hard";
+type SudokuStatus = "new" | "started" | "finished";
+
+export {Cell, SudokuBoard, SudokuBoardSolved, FormattedCell,
+    FormattedSudokuBoard, CellDraft, Difficulty, SudokuStatus}
 
 //aspectos a tener en cuenta: isPrivate
+//refinar el playerDraft, añadiendo un enum o regex de los numeros aceptados
 
 
-export type Difficulty = "easy" | "medium" | "hard";
-export type SudokuStatus = "notStarted" | "started" | "finished";
+export const buildPveBoard =  (user: User, difficulty: Difficulty): SudokuPVE => {
+    const {current, solved} =  createSudokuGame(difficulty);
+    return {
+        current,
+        solved,
+        difficulty,
+        status: 'new',
+        creationDate: new Date(),
+        participant: newParticipant(user, 1)
+    }
+}
+
+//para desarrollo
+function printMatrixNumbers(matrix: SudokuPVE['current']) {
+    for (let i = 0; i < matrix.length; i++) {
+      let row = matrix[i];
+      let numbers= row.map(obj => obj === null ? 'x' : obj.number).join('  ');
+      console.log(numbers);
+    }
+  } 
+
