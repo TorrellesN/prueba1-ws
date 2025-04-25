@@ -1,8 +1,8 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { SocketContext } from '../utilities/context/socketContext'
-import { UserContext } from '../utilities/context/userContext';
+import { SocketContext } from '../../utilities/context/socketContext'
+import { UserContext } from '../../utilities/context/userContext';
 import { Link } from 'react-router-dom';
-import { useAppStore } from '../utilities/store/useAppStore';
+import { useAppStore } from '../../utilities/store/useAppStore';
 
 export default function PVESudokuView() {
   

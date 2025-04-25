@@ -3,11 +3,8 @@ import User, { UserAuth } from "../domain/User";
 import UserRepository from "../domain/user.repository";
 
 export default class UserUseCases {
-    private userRepository : UserRepository;
 
-    constructor (userRepository : UserRepository) {
-        this.userRepository = userRepository;
-    }
+    constructor (private readonly userRepository : UserRepository) {}
 
     async register (user: User) : Promise<string> {
         if (user.pwd) {

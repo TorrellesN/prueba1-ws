@@ -22,38 +22,42 @@ export type SudokuPVP = {
     solved: SudokuBoardSolved,
     difficulty: Difficulty,
     status: SudokuStatus,
-    creationDate?: Date,
+    createdAt?: Date,
     participants: Participant[]
 }
 
 export type SudokuPVE = Omit<SudokuPVP, 'participants'> & {participant: Participant};
 
+/* SECONDARY TYPES */
 type Cell = { row: number; col: number; value: number | null };
+type CellToInsert = { row: number; col: number; value: number, rol: RolNumber };
 type SudokuBoard = (number | null)[][];
 type SudokuBoardSolved = number[][];
 type FormattedCell = { rol: RolNumber; number: number } | null;
 type FormattedSudokuBoard = FormattedCell[][];
-type CellDraft = { row: number; col: number; value: [] };
+type DraftCell = number[]; 
+type SudokuDraft = DraftCell[][]; 
 
-
+/* ENUMS */
 type Difficulty = "easy" | "medium" | "hard";
 type SudokuStatus = "new" | "started" | "finished";
 
 export {Cell, SudokuBoard, SudokuBoardSolved, FormattedCell,
-    FormattedSudokuBoard, CellDraft, Difficulty, SudokuStatus}
+    FormattedSudokuBoard, SudokuDraft, Difficulty, SudokuStatus}
 
 //aspectos a tener en cuenta: isPrivate
 //refinar el playerDraft, añadiendo un enum o regex de los numeros aceptados
 
-
+/* INITIALIZE METHODS */
 export const buildPveBoard =  (user: User, difficulty: Difficulty): SudokuPVE => {
     const {current, solved} =  createSudokuGame(difficulty);
+    //TODO: almacenar fecha correctamente
     return {
         current,
         solved,
         difficulty,
         status: 'new',
-        creationDate: new Date(),
+        createdAt: new Date(),
         participant: newParticipant(user, 1)
     }
 }
@@ -66,4 +70,6 @@ function printMatrixNumbers(matrix: SudokuPVE['current']) {
       console.log(numbers);
     }
   } 
+
+
 

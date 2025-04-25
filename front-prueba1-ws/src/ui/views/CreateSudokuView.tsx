@@ -1,9 +1,9 @@
 import { useContext, useEffect, useMemo, useState } from "react"
-import { SocketContext } from "../utilities/context/socketContext"
+import { SocketContext } from "../../utilities/context/socketContext"
 import { Listbox } from "@headlessui/react"
 import { useNavigate } from "react-router-dom"
-import { Difficulty, diffOptions } from "../utilities/types";
-import { useAppStore } from "../utilities/store/useAppStore";
+import { Difficulty, diffOptions } from "../../utilities/types";
+import { useAppStore } from "../../utilities/store/useAppStore";
 
 export default function CreateSudokuView() {
 
@@ -14,20 +14,29 @@ export default function CreateSudokuView() {
     const {socket, connectSocket, online} = useContext(SocketContext);
     
     const handleSudokuCreate = () => {
-      socket.emit('request-sudoku', "pve", difficulty);
+      if(difficulty) {
+        socket.emit('request-sudoku', "pve", difficulty);
       console.log('evento emitido')
+      console.log(online)
       setDifficulty(difficulty);
+      }
+      
     }
 
     useEffect(() => {
       connectSocket();
-      socket.on('generate-pve-sudoku', (data) => {
+      /* socket.on('request-sudoku', (data) => {
         console.log('recibidoooo')
         navigate(`/pve/sudoku`)
+      }) */
+
+      socket.on('generate-sudoku', (data) => {
+        console.log('sudoku recibido')
+        console.log(data)
       })
       
       return () => {
-        socket.off('generate-pve-sudoku')
+        socket.off('generate-sudoku')
       }
       
     }, [])

@@ -1,5 +1,5 @@
 import { SudokuPVE } from "./Sudoku";
 
 export default interface SudokuRepository {
-    insertSudokuPve (newSudoku: SudokuPVE): Promise<SudokuPVE> 
+    insertSudokuPve (newSudoku: SudokuPVE): Promise<string> 
 }

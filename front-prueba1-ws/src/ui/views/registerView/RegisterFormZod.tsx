@@ -1,13 +1,13 @@
 import { useState, FormEvent, ChangeEvent, useEffect, useMemo } from 'react';
-import { UserRegisterData, UserRegisterDataSchema } from '../../utilities/types';
+import { UserRegisterData, UserRegisterDataSchema } from '../../../utilities/types';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-toastify';
-import { registerService } from '../../services/api/authService';
+import { registerService } from '../../../services/apiRepo/authService';
 import { ErrorMessage } from '@hookform/error-message';
-import { useApiRequest } from '../../utilities/hooks/useApiRequest';
-import { useRegister } from '../../services/useCases/auth.useCases';
-import { useAppStore } from '../../utilities/store/useAppStore';
+import { useApiRequest } from '../../../utilities/hooks/useApiRequest';
+import { useRegister } from '../../../services/useCases/auth.useCases';
+import { useAppStore } from '../../../utilities/store/useAppStore';
 
 // Definición de tipos
 /* type FormData = {

@@ -1,4 +1,4 @@
-import { loginService, registerService } from "../api/authService";
+import { loginService, registerService } from "../apiRepo/authService";
 import { toast } from "react-toastify";
 import { useState } from "react";
 import { useAppStore } from "../../utilities/store/useAppStore";

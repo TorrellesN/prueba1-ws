@@ -1,6 +1,6 @@
 import { Navigate, Outlet, Route } from "react-router-dom";
-import LoginView from "../views/loginView/LoginView";
-import RegisterView from "../views/registerView/RegisterView";
+import LoginView from "../ui/views/loginView/LoginView";
+import RegisterView from "../ui/views/registerView/RegisterView";
 
 interface AuthRoutesProps {
     isAuth: boolean;

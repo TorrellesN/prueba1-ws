@@ -1,17 +1,17 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import AppLayout from "./layouts/AppLayout";
+import AppLayout from "./ui/layouts/AppLayout";
 import { SocketProvider } from "./utilities/context/socketContext";
 import { UserProvider } from "./utilities/context/userContext";
 import { useInitializeAuth } from "./utilities/hooks/useInitializeAuth";
-import CreateSudokuView from "./views/CreateSudokuView";
-import HomeView from "./views/HomeView";
-import LoginView from "./views/loginView/LoginView";
-import OnePSudokuView from "./views/PVESudokuView";
-import RegisterView from "./views/registerView/RegisterView";
+import CreateSudokuView from "./ui/views/CreateSudokuView";
+import HomeView from "./ui/views/HomeView";
+import LoginView from "./ui/views/loginView/LoginView";
+import OnePSudokuView from "./ui/views/PVESudokuView";
+import RegisterView from "./ui/views/registerView/RegisterView";
 import { useAppStore } from "./utilities/store/useAppStore";
 import AuthRoutes from "./routes/AuthRoutes";
 import PublicRoutes from "./routes/PublicRoutes";
-import UserView from "./views/UserView";
+import UserView from "./ui/views/UserView";
 
 export default function RouterApp() {
 
