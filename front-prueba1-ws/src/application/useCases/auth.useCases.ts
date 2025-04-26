@@ -1,8 +1,7 @@
-import { loginService, registerService } from "../apiRepo/authService";
-import { toast } from "react-toastify";
+import { loginService, registerService } from "../../infrastructure/services/authService";
 import { useState } from "react";
-import { useAppStore } from "../../utilities/store/useAppStore";
-import { UserLoginData, UserRegisterData } from "../../utilities/types";
+import { UserLoginData, UserRegisterData } from "../../domain/";
+import { useAppStore } from "../store/useAppStore";
 
 
 //HOOKS PERSONALIZADOS manejan zustand y api calls

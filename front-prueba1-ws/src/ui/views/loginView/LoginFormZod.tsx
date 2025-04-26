@@ -3,11 +3,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "react-toastify";
-import { loginService } from "../../../services/apiRepo/authService";
-import { useApiRequest } from "../../../utilities/hooks/useApiRequest";
-import { User, UserLoginData, UserLoginDataWRememberSchema } from "../../../utilities/types";
-import { useAppStore } from "../../../utilities/store/useAppStore";
-import { useLogin } from "../../../services/useCases/auth.useCases";
+import { loginService } from "../../../infrastructure/services/authService";
+import { useApiRequest } from "../../../application/hooks/useApiRequest";
+import { User, UserLoginData, UserLoginDataWRememberSchema } from "../../../domain/";
+import { useLogin } from "../../../application/useCases/auth.useCases";
+import { useAppStore } from "../../../application/store/useAppStore";
 
 // Definición de tipos
 /* type FormData = {

@@ -1,9 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { SocketContext } from '../../utilities/context/socketContext'
+import { SocketContext } from '../../application/context/socketContext'
 import { useContext, useState } from 'react';
-import { UserContext } from '../../utilities/context/userContext';
-import { Button, CloseButton, PopoverButton } from '@headlessui/react';
-import { useAppStore } from '../../utilities/store/useAppStore';
+import { useAppStore } from '../../application/store/useAppStore';
 
 export default function HomeView() {
 

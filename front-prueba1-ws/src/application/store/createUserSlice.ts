@@ -1,9 +1,11 @@
 import { StateCreator } from "zustand";
-import { User, UserLogedData } from "../types";
+import { User, UserLogedData } from "../../domain";
+import { RolNumber } from "../../domain";
 
 export type AuthStateType = {
   user: User,
   token: string | null,
+  rol: RolNumber | null,
   setLoginState: (userLoged: UserLogedData) => void,
   logout: () => void,
   setToken: (newToken: string) => void
@@ -20,6 +22,7 @@ const userInitialState = {
   profileImg: ''
 }
 
+//TODO: reimplementar método de refrescar token
 const updateToken = (callbackReEvaluate: (token: string) => void, newToken: string) => {
   callbackReEvaluate(newToken); // actualiza las props decodedToken y isExpired
 }
@@ -29,7 +32,7 @@ const updateToken = (callbackReEvaluate: (token: string) => void, newToken: stri
 export const createUserSlice: StateCreator<AuthStateType> = (set, get, api) => ({
   user: userInitialState,
   token: null,
-
+  rol: null,
 
 
   setLoginState: (userLoged: UserLogedData) => {
@@ -42,25 +45,6 @@ export const createUserSlice: StateCreator<AuthStateType> = (set, get, api) => (
 
   },
 
-
-  /* login: async(userLoged: UserLogedData) => {
-      
-  
-      const { dataApi, errorApi, execute } = useApiRequest<UserLogedData>();
-      await execute(() => loginService(user));
-      if (dataApi) {
-        set((state) => ({
-          token: dataApi.token,
-          user: dataApi.user
-      }))
-      } else if (errorApi) {
-        set ({authError: errorApi})
-      }
-  
-  
-      set({isAuthLoading: false})
-  
-    }, */
 
 
   logout: () => {
@@ -75,48 +59,10 @@ export const createUserSlice: StateCreator<AuthStateType> = (set, get, api) => (
     set({ token: newToken });
   },
 
+  setRol: (rol: RolNumber) => {
+    set({ rol: rol });
+  }
 
-  /* initializeAuth: async () => {
-      const storedToken = localStorage.getItem('token');
-      
-      if (!storedToken) {
-        set({ isInitialized: true });
-        return;
-      }
-  
-      const { decodedToken, isExpired, reEvaluateToken } = useJwt(storedToken);
-      console.log(decodedToken)
-  
-      if (!isExpired && decodedToken) {
-        const decodedUser = decodedToken as User;
-        set({
-          token: storedToken,
-          user: {
-            username: decodedUser.username,
-            email: decodedUser.email,
-            profileImg: decodedUser.profileImg
-          },
-          isInitialized: true
-        });
-      } else {
-        try {
-          //TODO: logica peticion renovar token:
-          // const newToken = await refreshToken(storedToken);
-          updateToken(reEvaluateToken, ' ');
-          set({
-            token: ' ',
-            isInitialized: true
-          });
-        } catch (error) {
-          localStorage.removeItem('token');
-          set({
-            token: null,
-            user: userInitialState,
-            isInitialized: true
-          });
-        }
-      }
-    }*/
 })
 
 

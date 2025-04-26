@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useEffect, useState } from "react";
 import { useJwt } from "react-jwt";
-import { User } from "../types";
+import { User } from "../../domain/";
 
 //!ESTADO DE USER PASADO A ZUSTAND
 type UserContextProps = {
@@ -12,7 +12,6 @@ type UserContextProps = {
     logout: () => void
 }
 
-//TODO: lo mejor es que el user en un futuro se almacene en zustand para manejar jwt y la lógica del login
 export const UserContext = createContext<UserContextProps>(null!)
 
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
@@ -42,7 +41,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
                     profileImg: decodedTokenOb.profileImg
                 })
             } else {
-                //TODO: logica peticion para comprobar que el token sigue operativo o necesito otro.
                 updateToken(reEvaluateToken, 'token a actualizar')
             }
         }

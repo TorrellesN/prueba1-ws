@@ -1,39 +1,48 @@
 import { useContext, useEffect, useMemo, useState } from "react"
-import { SocketContext } from "../../utilities/context/socketContext"
+import { SocketContext } from "../../application/context/socketContext"
 import { Listbox } from "@headlessui/react"
 import { useNavigate } from "react-router-dom"
-import { Difficulty, diffOptions } from "../../utilities/types";
-import { useAppStore } from "../../utilities/store/useAppStore";
+import { Difficulty, diffOptions } from "../../domain/";
+import { useAppStore } from "../../application/store/useAppStore";
 
 export default function CreateSudokuView() {
 
     const navigate = useNavigate();
     const [difSelected, setDifSelected] = useState<string>("");
     const difficulty = useMemo<Difficulty>(() => (Object.entries(diffOptions).find(([, val]) => val === difSelected)?.[0]) as Difficulty, [difSelected])
-    const setDifficulty = useAppStore( state => state.setDifficulty );
+    const setInnitialSudokuState = useAppStore( state => state.setInnitialSudokuState );
     const {socket, connectSocket, online} = useContext(SocketContext);
+    
+    type socketCResponse = {success: boolean, payload: any}
     
     const handleSudokuCreate = () => {
       if(difficulty) {
-        socket.emit('request-sudoku', "pve", difficulty);
-      console.log('evento emitido')
-      console.log(online)
-      setDifficulty(difficulty);
+        socket.emit('request-sudoku', "pve", difficulty, (response: socketCResponse) => {
+        if (response.success) {
+          console.log('Sudoku recibido')
+          setInnitialSudokuState(response.payload);
+          navigate(`/pve/sudoku`)
+        } else {
+          console.error('Error al crear el sudoku')
+        }
+      });
+      /* setDifficulty(difficulty); */
       }
       
     }
 
     useEffect(() => {
       connectSocket();
+      
       /* socket.on('request-sudoku', (data) => {
         console.log('recibidoooo')
         navigate(`/pve/sudoku`)
       }) */
 
-      socket.on('generate-sudoku', (data) => {
+      /* socket.on('generate-sudoku', (data) => {
         console.log('sudoku recibido')
         console.log(data)
-      })
+      }) */
       
       return () => {
         socket.off('generate-sudoku')

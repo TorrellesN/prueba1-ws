@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { request } from "../../utilities/apiConfig/axios";
-import { User, UserLogedData, UserLogedSchema, UserLoginData, UserRegisterData } from "../../utilities/types";
-import { UserContext } from "../../utilities/context/userContext";
+import { User, UserLogedData, UserLogedSchema, UserLoginData, UserRegisterData } from "../../domain/validationSchemas";
+import { UserContext } from "../../application/context/userContext";
 import { useAppStore } from "../../utilities/store/useAppStore";
 
 /* export async function loginUser (email: string, pwd: string) {

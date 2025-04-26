@@ -1,12 +1,12 @@
 import { Server } from "socket.io"
 import { decryptJWT } from "../context/security/auth";
-import UserUseCases from "../users/application/user.useCases";
 import { UserAuth } from "../users/domain/User";
 import { Difficulty } from "../sudokus/domain/Sudoku";
 import SudokuUseCases from "../sudokus/application/sudoku.useCases";
 import SudokuRepositoryMongoDB from "../sudokus/infrastructure/bd/sudoku.repository.mongodb";
 
 const sudokuUseCases: SudokuUseCases = new SudokuUseCases(new SudokuRepositoryMongoDB());
+type socketCallback = (response: { success: boolean, payload: any }) => void
 
 export default function configureSocket(io: Server) {
     io.on('connection', (socket) => {
@@ -16,15 +16,21 @@ export default function configureSocket(io: Server) {
             return socket.disconnect();
             //TODO: ver si puedo hacer esta función con algún callback para que user tenga que iniciar sesión de nuevo
         }
-        const user = decryptedUser as UserAuth; //
+        const user = decryptedUser as UserAuth;
 
 
-        socket.on('request-sudoku', async (gameMode: 'pve' | 'pvp', difficulty: Difficulty, callback) => {
-            console.log(gameMode, difficulty);
+        socket.on('request-sudoku', async (gameMode: 'pve' | 'pvp', difficulty: Difficulty, callback: socketCallback) => {
 
-            const sudokuPuzzle = await sudokuUseCases.createPve(user, difficulty);
-            /* socket.emit('generate-sudoku', sudokuPuzzle); */
-            callback({ success: true, message: 'Sudoku data'});
+            if (typeof callback === 'function') {
+                try {
+                    const sudokuPuzzle = await sudokuUseCases.createPve(user, difficulty);
+                    callback({ success: true, payload: sudokuPuzzle });
+                } catch (error) {
+                    console.log('Error al crear el sudoku: ' + error);
+                    callback({ success: false, payload: 'No se pudo generar el sudoku, vuelve a intentarlo más tarde.' });
+                }
+            }
+
         });
 
         socket.on('insert-number', async (CellToInsert) => {

@@ -17,13 +17,15 @@ export const useSocket = (serverPath: string) => {
         }
     }));
 
+
+
     const connectSocket = useCallback(() => {
         //const token = localStorage.getItem('token');
         //if ( auth.logged )...
         if (!token) return;
        socket.current.connect();
 
-    }, [socket])
+    }, [socket, token])
 
     const disconnectSocket = useCallback( () => {
         socket.current.disconnect();
