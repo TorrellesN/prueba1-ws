@@ -6,7 +6,7 @@ import { PlayerCell, PlayerSudokuBoard } from '../../../domain';
 
 interface SudokuBoardProps {
   currentSudoku: PlayerSudokuBoard;
-  onCellClick: (row: number, col: number) => void;
+  onCellClick: (row: number, col: number, free: boolean) => void
 }
 
 export default function PVESudokuBoard({ currentSudoku, onCellClick }: SudokuBoardProps) {
@@ -15,21 +15,17 @@ export default function PVESudokuBoard({ currentSudoku, onCellClick }: SudokuBoa
 
   
 
-  // Manejador de clic en celda
   const handleCellClick = (row: number, col: number, cell: PlayerCell) => {
     // Si la celda tiene rol 0, no se puede seleccionar pero sí destacar el número
     if (cell) {
-      setSelectedNumber(cell.number);
+      setSelectedNumber(cell.value);
+      onCellClick(row, col, false);
     } else {
       setSelectedNumber(null);
+      onCellClick(row, col, true)
+
     }
-    
     setSelectedCell({ row, col });
-    
-    // Si hay un manejador de clic proporcionado, lo llamamos
-    if (onCellClick) {
-      onCellClick(row, col);
-    }
   };
 
 
@@ -46,7 +42,7 @@ export default function PVESudokuBoard({ currentSudoku, onCellClick }: SudokuBoa
 
   const hasSameNumber = (cell: PlayerCell): boolean => {
     if (!selectedNumber || !cell) return false;
-    return cell.number === selectedNumber;
+    return cell.value === selectedNumber;
   };
 
   // Define clases para los bordes
@@ -158,7 +154,7 @@ export default function PVESudokuBoard({ currentSudoku, onCellClick }: SudokuBoa
                 data-row={rowIndex}
                 data-col={colIndex}
               >
-                {cell ? cell.number : ''}
+                {cell ? cell.value : ''}
               </div>
             ))}
           </React.Fragment>

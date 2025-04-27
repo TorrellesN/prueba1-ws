@@ -1,5 +1,6 @@
 import { StateCreator } from "zustand";
-import { Difficulty, PlayerSudokuBoard, SudokuBoardSolved, SudokuStatus, Participant, initialPVESudoku, SudokuPVE, SudokuPVP } from "../../domain/";
+import { Difficulty, PlayerSudokuBoard, SudokuBoardSolved, SudokuStatus, Participant, initialPVESudoku, SudokuPVE, SudokuPVP, CellToInsert, pointsPerCell } from "../../domain/";
+import { toast } from "react-toastify";
 
 export type SudokuStateType = {
   id?: string,
@@ -13,6 +14,9 @@ export type SudokuStateType = {
   points: number,
   setInnitialSudokuState: (sudoku: SudokuPVE | SudokuPVP) => void,
   setStartedStatus: () => void,
+  calculatePoints: () => number,
+  isCorrectNumber: (number: number, row: number, col: number) => boolean,
+  savePVEMove: (cellToInsert: CellToInsert, calculatedPoints: number) => void
 }
 
 
@@ -54,7 +58,44 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
       ...state,
       status: 'started'
     }))
+  },
+
+
+  calculatePoints: () => {
+    const { comboAcc, points } = get();
+    if (comboAcc >= 10) {
+      return points + pointsPerCell + (10 * 2);
+    }
+    return points + pointsPerCell + (comboAcc * 2);
+  },
+
+  isCorrectNumber: (number: number, row: number, col: number) => {
+
+    if (number === get().solved[row][col]) {
+      return true;
+    } else {
+      toast.error('Número incorrecto');
+      return false;
+    }
+  },
+
+  savePVEMove: (cellToInsert: CellToInsert, calculatedPoints: number) => {
+    const { current } = get();
+    const { row, col, value } = cellToInsert;
+    const newCurrent = [...current];
+    newCurrent[row][col] = {value, rol: 1};
+
+      set((state) => ({
+        ...state,
+        current: newCurrent,
+        points: calculatedPoints,
+        comboAcc: state.comboAcc >= 10 ? 10 : state.comboAcc + 1
+      }))
+    
   }
+
+
+
 
 
 })

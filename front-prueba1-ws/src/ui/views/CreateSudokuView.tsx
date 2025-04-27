@@ -2,7 +2,7 @@ import { useContext, useEffect, useMemo, useState } from "react"
 import { SocketContext } from "../../application/context/socketContext"
 import { Listbox } from "@headlessui/react"
 import { useNavigate } from "react-router-dom"
-import { Difficulty, diffOptions } from "../../domain/";
+import { Difficulty, diffOptions, socketCResponse } from "../../domain/";
 import { useAppStore } from "../../application/store/useAppStore";
 
 export default function CreateSudokuView() {
@@ -11,12 +11,13 @@ export default function CreateSudokuView() {
     const [difSelected, setDifSelected] = useState<string>("");
     const difficulty = useMemo<Difficulty>(() => (Object.entries(diffOptions).find(([, val]) => val === difSelected)?.[0]) as Difficulty, [difSelected])
     const setInnitialSudokuState = useAppStore( state => state.setInnitialSudokuState );
-    const {socket, connectSocket, online} = useContext(SocketContext);
+    const {socket, connectSocket} = useContext(SocketContext);
     
-    type socketCResponse = {success: boolean, payload: any}
+    
     
     const handleSudokuCreate = () => {
       if(difficulty) {
+        
         socket.emit('request-sudoku', "pve", difficulty, (response: socketCResponse) => {
         if (response.success) {
           console.log('Sudoku recibido')
@@ -34,24 +35,9 @@ export default function CreateSudokuView() {
     useEffect(() => {
       connectSocket();
       
-      /* socket.on('request-sudoku', (data) => {
-        console.log('recibidoooo')
-        navigate(`/pve/sudoku`)
-      }) */
-
-      /* socket.on('generate-sudoku', (data) => {
-        console.log('sudoku recibido')
-        console.log(data)
-      }) */
-      
-      return () => {
-        socket.off('generate-sudoku')
-      }
+      return () => {}
       
     }, [])
-
-
-
 
 
 
@@ -100,9 +86,6 @@ export default function CreateSudokuView() {
               </Listbox.Option>
             ))}  
 
-              {/* <ListboxOption value="canceled" className="cursor-pointer py-2 px-4 text-black hover:bg-gray-200">
-                Canceled
-              </ListboxOption> */}
             </Listbox.Options>
           )}
         </div>
@@ -128,8 +111,4 @@ export default function CreateSudokuView() {
     
   </>
   )
-}
-
-function getKeyByValue(): Difficulty {
-  throw new Error("Function not implemented.");
 }

@@ -10,9 +10,9 @@ export const diffOptions: Record<Difficulty, string> = {
 
 
 export type Cell = { row: number; col: number; value: number | null };
-export type CellToInsert = { row: number; col: number; value: number, rol: RolNumber };
+export type CellToInsert = { row: number; col: number; value: number, rol?: RolNumber };
 export type SudokuBoardSolved = number[][];
-export type PlayerCell = { rol: RolNumber; number: number } | null;
+export type PlayerCell = { rol: RolNumber; value: number } | null;
 export type PlayerSudokuBoard = PlayerCell[][];
 export type DraftCell = number[]; 
 export type SudokuDraft = DraftCell[][]; 

@@ -5,10 +5,11 @@ import { Cell, Difficulty, FormattedSudokuBoard, SudokuBoard, SudokuBoardSolved 
 export type SudokuResult = {
   current: FormattedSudokuBoard;
   solved: SudokuBoardSolved;
+  emptyCellsCount?: number;
 };
 
 // Define niveles de dificultad por cantidad de celdas a eliminar
-enum DifficultyCells {
+export enum DifficultyCells {
   Easy = 35,    // Elimina ~35 celdas (deja ~46 números)
   Medium = 45,  // Elimina ~45 celdas (deja ~36 números)
   Hard = 55     // Elimina ~55 celdas (deja ~26 números)
@@ -19,7 +20,7 @@ enum DifficultyCells {
  */
 function generateSudoku(difficulty: Difficulty): SudokuResult {
   // Límite máximo de intentos para generar un sudoku válido
-  const MAX_ATTEMPTS = 10;
+  const MAX_ATTEMPTS = 15;
   let attempts = 0;
   
   // Inicializar con un tablero vacío para evitar problemas de tipado
@@ -401,8 +402,8 @@ function formatCurrentSudoku(board: SudokuBoard): FormattedSudokuBoard {
     for (let col = 0; col < 9; col++) {
       if (board[row][col] !== null) {
         formattedBoard[row][col] = {
-          rol: 0,  // Valor fijo según requisitos
-          number: board[row][col] as number
+          rol: 0,
+          value: board[row][col] as number
         };
       } else {
         formattedBoard[row][col] = null;
@@ -452,12 +453,16 @@ function createSudokuFast(): SudokuBoard {
  */
 export function createSudokuGame(difficulty: Difficulty): SudokuResult {
   try {
-    return generateSudoku(difficulty);
+
+    const generated = generateSudoku(difficulty);
+    generated.emptyCellsCount = difficulty === 'easy' ? DifficultyCells.Easy : difficulty === 'medium' ? DifficultyCells.Medium : DifficultyCells.Hard;
+    return generated;
   } catch (error) {
-    console.error("Error generando sudoku, utilizando fallback:", error);
+    console.error("Error generando sudoku utilizando fallback:", error);
     
     // Último recurso: crear un sudoku muy simple
     const emptyBoard: SudokuBoard = Array(9).fill(null).map(() => Array(9).fill(null));
+    const numOfCellsToRemove = 10;
     
     // Llenar el tablero con un patrón predeterminado válido
     for (let i = 0; i < 9; i++) {
@@ -468,11 +473,12 @@ export function createSudokuGame(difficulty: Difficulty): SudokuResult {
     }
     
     // Crear un puzzle muy simple eliminando pocas celdas
-    const simpleBoard = createSimplePuzzle(emptyBoard, 10);
+    const simpleBoard = createSimplePuzzle(emptyBoard, numOfCellsToRemove);
     
     return {
       current: formatCurrentSudoku(simpleBoard),
-      solved: emptyBoard as SudokuBoardSolved
+      solved: emptyBoard as SudokuBoardSolved,
+      emptyCellsCount: numOfCellsToRemove
     };
   }
 }
