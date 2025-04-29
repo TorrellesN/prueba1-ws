@@ -1,11 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { io } from "socket.io-client";
 import { useAppStore } from "../store/useAppStore";
+import { useLocation } from "react-router-dom";
 
 
 //! ESTE HOOK SOLO SE UTILIZA A TRAVES DE SOCKET CONTEXT
-export const useSocket = (serverPath: string) => {
+export const useSocket = (serverPath: string, allowedRoutes: string[]) => {
     const token = useAppStore((state) => state.token);
+    const {pathname} = useLocation();
     const [online, setOnline] = useState(false);
 
     const socket = useRef(io(serverPath, {
@@ -52,6 +54,16 @@ export const useSocket = (serverPath: string) => {
             disconnectSocket();
         }
     }, [token, disconnectSocket])
+
+    useEffect(() => {
+        const isAllowed = allowedRoutes.some(route => pathname.startsWith(route));
+        console.log('no entra')
+        if (isAllowed) {
+          connectSocket();
+        } else {
+          disconnectSocket();
+        }
+}, [connectSocket, disconnectSocket, pathname])
 
     
     return {

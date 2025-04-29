@@ -13,7 +13,7 @@ export const generateEmptyPlayerBoard = (): PlayerSudokuBoard => {
     current: generateEmptyPlayerBoard(),
     solved: generateSolvedBoardWithOnes(),
     difficulty: "easy",
-    status: "new"
+    status: "started"
   };
   
   export const initialPVPSudoku: SudokuPVP = {
@@ -21,7 +21,7 @@ export const generateEmptyPlayerBoard = (): PlayerSudokuBoard => {
     current: generateEmptyPlayerBoard(),
     solved: generateSolvedBoardWithOnes(),
     difficulty: "easy",
-    status: "new",
+    status: "started",
     participants: []
   };
   

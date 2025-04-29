@@ -4,6 +4,7 @@ import { UserAuth } from "../users/domain/User";
 import { CellToInsert, Difficulty } from "../sudokus/domain/Sudoku";
 import SudokuUseCases from "../sudokus/application/sudoku.useCases";
 import SudokuRepositoryMongoDB from "../sudokus/infrastructure/bd/sudoku.repository.mongodb";
+import { log } from "node:console";
 
 const sudokuUseCases: SudokuUseCases = new SudokuUseCases(new SudokuRepositoryMongoDB());
 type socketCallback = (response: { success: boolean, payload: any }) => void
@@ -45,13 +46,24 @@ export default function configureSocket(io: Server) {
                 console.log('sudokuRoom: ', sudokuRoom);
                 const { row, col, value } = cellToInsert;
 
-                const confirmMessage = await sudokuUseCases.insertSudokuPveMove(
+                const confirmMessage = await sudokuUseCases.insertSudokuMovePve(
                     sudokuRoom!, { row, col, value, rol: 1 }, pointsForSaving
                 );
 
                 if (confirmMessage === 'partida terminada') {
-                    socket.to(sudokuRoom).emit('sudoku-finished', { message: 'partida terminada' });
-                    //TODO: ver si puedo hacer un callback para que el cliente sepa que la partida ha terminado
+                    try {
+                        //TODO: en pvp añadimos logica para ganadores/perdedores. en pve no suma nada en la liga.
+                        await sudokuUseCases.finishGamePve(sudokuRoom);
+
+                        socket.to(sudokuRoom).emit('sudoku-finished', { message: 'partida terminada' });
+                        callback({ success: true, payload: 'finished' });
+
+                    } catch (error) {
+                        console.log(error)
+                        callback({ success: false, payload: 'Lo sentimos, estamos teniendo problemas en servidor.' });
+                    }
+
+
                 }
                 if (confirmMessage === 'movimiento guardado') {
                     if (typeof callback === 'function') {
@@ -74,6 +86,31 @@ export default function configureSocket(io: Server) {
             }
 
             //TODO: manejar error cuando no hay sudokuRoom, puedo desconectar el socket por ejemplo..
+        })
+
+
+        socket.on('reset-pve-combo', async (callback: socketCallback) => {
+            try {
+                const sudokuId = Array.from(socket.rooms).find((room) => room !== socket.id);
+
+                const isDeleted = await sudokuUseCases.resetComboPve(sudokuId!);
+                if (isDeleted && typeof callback === 'function') callback({ success: true, payload: '' });
+                if (!isDeleted && typeof callback === 'function') callback({ success: false, payload: '' });
+            } catch (error) {
+                if (typeof callback === 'function') callback({ success: false, payload: '' });
+            }
+        })
+
+
+        socket.on('quit-pve-game', async () => {
+            try {
+                const sudokuId = Array.from(socket.rooms).find((room) => room !== socket.id);
+            const sdf = await sudokuUseCases.leaveGamePve(sudokuId!);
+            console.log(sdf)
+            } catch (error) {
+                console.log(error)
+            }
+
         })
 
 

@@ -13,10 +13,10 @@ export type SudokuStateType = {
   comboAcc: number,
   points: number,
   setInnitialSudokuState: (sudoku: SudokuPVE | SudokuPVP) => void,
-  setStartedStatus: () => void,
   calculatePoints: () => number,
   isCorrectNumber: (number: number, row: number, col: number) => boolean,
-  savePVEMove: (cellToInsert: CellToInsert, calculatedPoints: number) => void
+  savePVEMove: (cellToInsert: CellToInsert, calculatedPoints: number) => void,
+  resetCombo: () => void
 }
 
 
@@ -33,15 +33,18 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
   points: 0,
 
 
-
+  //TODO: para cuando haga pvp cambiar la condicional de participants?
   setInnitialSudokuState: (sudoku: SudokuPVE | SudokuPVP) => {
+    localStorage.setItem('sudokuRoom', sudoku.id!)
     set({
       id: sudoku.id,
       current: sudoku.current,
       solved: sudoku.solved,
       status: 'started',
       participants: 'participants' in sudoku ? sudoku.participants : [],
-      difficulty: sudoku.difficulty
+      difficulty: sudoku.difficulty,
+      comboAcc: 0,
+      points: 0
     })
     if (!('participants' in sudoku)) {
       //TODO: por el momento usar api para recoger algo del otro slice, más tarde implementar bien zustand
@@ -50,14 +53,6 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
         setRol(1);
       }
     }
-  },
-
-
-  setStartedStatus: () => {
-    set((state) => ({
-      ...state,
-      status: 'started'
-    }))
   },
 
 
@@ -74,9 +69,12 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
     if (number === get().solved[row][col]) {
       return true;
     } else {
-      toast.error('Número incorrecto');
       return false;
     }
+  },
+
+  resetCombo: () => {
+    set({comboAcc: 0})
   },
 
   savePVEMove: (cellToInsert: CellToInsert, calculatedPoints: number) => {
@@ -93,8 +91,6 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
       }))
     
   }
-
-
 
 
 

@@ -28,7 +28,7 @@ type FormattedSudokuBoard = FormattedCell[][];
 
 /* ENUMS */
 type Difficulty = "easy" | "medium" | "hard";
-type SudokuStatus = "new" | "started" | "finished";
+type SudokuStatus = "started" | "finished";
 
 export {
     Cell, Difficulty, FormattedCell, CellToInsert,
@@ -45,7 +45,7 @@ export const buildPveBoard =  (user: User, difficulty: Difficulty): SudokuPVE =>
         current,
         solved,
         difficulty,
-        status: 'new',
+        status: 'started',
         createdAt: new Date(),
         emptyCellsCount,
         player: newPlayer(user, 1),

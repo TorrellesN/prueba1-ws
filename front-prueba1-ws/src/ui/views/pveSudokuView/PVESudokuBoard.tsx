@@ -118,7 +118,7 @@ export default function PVESudokuBoard({ currentSudoku, onCellClick }: SudokuBoa
     return classes;
   };
 
-  //Lógica para cerrar el sudoku
+  //Lógica para quitar estilos al clicar fuera
   const boardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

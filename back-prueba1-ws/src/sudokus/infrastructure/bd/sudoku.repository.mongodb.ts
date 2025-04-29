@@ -2,6 +2,7 @@ import { ObjectId } from 'mongodb';
 import { collections } from '../../../context/db/mongodb.connection';
 import { CellToInsert, SudokuPVE } from '../../domain/Sudoku';
 import SudokuRepository from '../../domain/sudoku.repository';
+import { RolNumber } from '../../../users/domain/Player';
 
 export default class SudokuRepositoryMongoDB implements SudokuRepository {
     
@@ -13,7 +14,7 @@ export default class SudokuRepositoryMongoDB implements SudokuRepository {
     };
 
 
-    async insertSudokuPveMove(sudokuId: string, cellToInsert: CellToInsert, pointsForSaving: number): Promise<SudokuPVE> {
+    async insertSudokuMovePve(sudokuId: string, cellToInsert: CellToInsert, pointsForSaving: number): Promise<SudokuPVE> {
         const result = await collections.pveSudoku.findOneAndUpdate(
             {
                  _id: new ObjectId(sudokuId),
@@ -38,4 +39,38 @@ export default class SudokuRepositoryMongoDB implements SudokuRepository {
         const sudokuPve : SudokuPVE= { current, solved, difficulty, emptyCellsCount }; 
         return sudokuPve;
     };
+
+
+    async resetComboPve(sudokuId: string): Promise<boolean> {
+        const result = await collections.pveSudoku.updateOne({_id: new ObjectId(sudokuId)}, {
+            $set: {
+                [`player.comboAcc`]: 0
+            }
+        })
+        if (result.matchedCount === 0 || result.modifiedCount === 0) return false;
+        return true;
+    }
+
+
+    async finishGamePve(sudokuId: string): Promise<boolean> {
+        console.log('sudoku',sudokuId);
+        
+        const result = await collections.pveSudoku.updateOne({_id: new ObjectId(sudokuId)}, {
+            $set: {
+                status: "finished"
+            }
+        })
+
+        console.log(result);
+        
+        if (result.matchedCount === 0 || result.modifiedCount === 0) return false;
+        return true;
+    }
+
+
+    async leaveGamePve(sudokuId: string): Promise<boolean> {
+        const result = await collections.pveSudoku.deleteOne({_id: new ObjectId(sudokuId)})
+        if (!result.acknowledged || result.deletedCount === 0) return false;
+        return true;
+    }
 }

@@ -1,7 +1,7 @@
 import { Participant, RolNumber } from "../user.model/UserModel";
 
 export type Difficulty = "easy" | "medium" | "hard";
-export type SudokuStatus = "new" | "started" | "finished";
+export type SudokuStatus = "started" | "finished";
 export const diffOptions: Record<Difficulty, string> = {
   easy: "Fácil",
   medium: "Medio",

@@ -14,17 +14,17 @@ export const SocketContext = createContext<SocketContextProps>(null!);
 
 
 export const SocketProvider = ({children}: {children : React.ReactNode}) => {
-
-    const { socket, online, connectSocket, disconnectSocket } = useSocket('http://localhost:4000');
+    const { socket, online, connectSocket, disconnectSocket } = useSocket(import.meta.env.VITE_API_URL_DEVELOPMENT_SOCKET, ['/pve']);
 
     useEffect(() => {
         if (online) {
             console.log('conexion establecida')
-            socket.on( 'prueba-evento', (usuarios) => {
+            /* socket.on( 'prueba-evento', (usuarios) => {
                console.log('recibido')
-            })
+            }) */
         } else {
             socket.off('lista-usuarios')
+            console.log('desconectando')
         }
 
         return () => {
