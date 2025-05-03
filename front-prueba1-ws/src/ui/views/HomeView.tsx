@@ -10,7 +10,7 @@ export default function HomeView() {
 
 
 
-  const handleRedirectEnter = () => {
+  const handleRedirectPve = () => {
     navigate('/oneplayer/create');
   }
 
@@ -25,13 +25,16 @@ export default function HomeView() {
     <nav className="my-5">
       <button
         className="bg-purple-400 hover:bg-purple-600 px-10 py-3 text-white text-xl font-bold cursor-pointer transition-colors"
-        onClick = {handleRedirectEnter}
+        onClick = {() =>  navigate('/')}
       >
         Entrar
       </button>
+
     </nav>
     
-        <p className="text-center py-20">No hay sudokus aún {''}</p>
+        <div className="text-center py-20 space-x-5">
+
+        
           <Link
             className="text-fuchsia-500 font-bold"
             to='/auth/login'
@@ -40,6 +43,7 @@ export default function HomeView() {
             className="text-fuchsia-500 font-bold"
             to='/auth/register'
           >Registrarse</Link>
+          </div>
         
         
   </>

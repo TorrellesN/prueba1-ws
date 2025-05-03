@@ -38,7 +38,16 @@ async function createMongoConnection() {
 
 const addCollections = (db: Db) => {
   collections.pveSudoku = db.collection(
-    process.env.MONGO_DB_COLLECTION_PVESUDOKU || "pvesudoku"
+    process.env.MONGO_DB_COLLECTION_PVESUDOKU || "pveSudoku"
+  );
+  collections.easyPvpSudoku = db.collection(
+    process.env.MONGO_DB_COLLECTION_PVPSUDOKU_EASY|| "pvpSudokuEasy"
+  );
+  collections.mediumPvpSudoku = db.collection(
+    process.env.MONGO_DB_COLLECTION_PVPSUDOKU_HARD || "pvpSudokuHard"
+  );
+  collections.hardPvpSudoku = db.collection(
+    process.env.MONGO_DB_COLLECTION_PVPSUDOKU_MEDIUM || "pvpSudokuMedium"
   );
 
 };

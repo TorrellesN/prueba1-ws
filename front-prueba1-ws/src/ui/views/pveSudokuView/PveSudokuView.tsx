@@ -2,10 +2,10 @@ import { useContext, useEffect, useState } from 'react'
 import { SocketContext } from '../../../application/context/socketContext'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppStore } from '../../../application/store/useAppStore';
-import PVESudokuBoard from './PVESudokuBoard';
+import PveSudokuBoard from './PveSudokuBoard';
 import SudokuInput from './SudokuInput';
 import { toast } from 'react-toastify';
-import { SocketCResponse } from '../../../domain/';
+import { SocketCResponse } from '../../../domain';
 import QuitGameModal from './QuitGameModal';
 
 export default function PVESudokuView() {
@@ -21,6 +21,7 @@ export default function PVESudokuView() {
   const setStartedSudokuState = useAppStore((state) => state.setStartedSudokuState);
   const fillEmptyCells = useAppStore((state) => state.fillEmptyCells);
   const restartSudokuState = useAppStore((state) => state.restartSudokuState);
+  const setFinishedState = useAppStore((state) => state.setFinishedState);
 
   const navigate = useNavigate();
   const { socket, online } = useContext(SocketContext);
@@ -49,7 +50,7 @@ export default function PVESudokuView() {
   useEffect(() => {
     setIsLoading(true);
     // Intentar recuperar los datos de la partida desde localStorage o la BD
-    const sudokuId = localStorage.getItem('sudokuRoom');
+    const sudokuId = localStorage.getItem('sudokuRoomPve');
     if (sudokuId && online) {
       // Recuperar datos de la partida
       socket.emit('reconnect-to-pve-game', sudokuId, (response: SocketCResponse) => {
@@ -81,6 +82,7 @@ export default function PVESudokuView() {
 
   const handleCellClick = (row: number, col: number, free: boolean) => {
     if (free) {
+      console.log
       setSelectedCell({ row, col });
     } else {
       setSelectedCell(null);
@@ -123,6 +125,7 @@ export default function PVESudokuView() {
 
   useEffect(() => {
     socket.on('sudoku-finished', (data)=>{
+      setFinishedState();
       navigate('/pve/win')
     })
     return (() => {
@@ -166,12 +169,12 @@ export default function PVESudokuView() {
 
         {/* Sudoku en el centro */}
         <div className="w-full sm:col-span-3">
-          <PVESudokuBoard onCellClick={handleCellClick} />
+          <PveSudokuBoard onCellClick={handleCellClick} />
         </div>
 
         {/* Contenedor de la izquierda (abajo en móvil) */}
         <div className=" w-full bg-gray-100 p-4 rounded-xl sm:col-span-2">
-          <SudokuInput handleInputNumber={handleInputNumber} points={points} comboAcc={comboAcc} />
+          <SudokuInput handleInputNumber={handleInputNumber} points={points} comboAcc={comboAcc} selectedCell={selectedCell} />
         </div>
       </div>
       <div>

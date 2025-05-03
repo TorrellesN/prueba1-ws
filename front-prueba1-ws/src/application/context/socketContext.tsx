@@ -14,7 +14,10 @@ export const SocketContext = createContext<SocketContextProps>(null!);
 
 
 export const SocketProvider = ({children}: {children : React.ReactNode}) => {
-    const { socket, online, connectSocket, disconnectSocket } = useSocket(import.meta.env.VITE_API_URL_DEVELOPMENT_SOCKET, ['/pve']);
+    const { socket, online, connectSocket, disconnectSocket } = useSocket(
+        import.meta.env.VITE_API_URL_DEVELOPMENT_SOCKET,
+        ['/pve', '/pvp']
+    );
 
     useEffect(() => {
         if (online) {

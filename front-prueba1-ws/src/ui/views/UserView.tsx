@@ -6,15 +6,10 @@ import { useAppStore } from '../../application/store/useAppStore';
 export default function HomeView() {
 
   const {online, connectSocket} = useContext(SocketContext);
-  const [name, setName] = useState('');
   const navigate = useNavigate();
   const user = useAppStore(state => state.user)
 
 
-
-  const handleRedirectEnter = () => {
-    navigate('/pve/create');
-  }
 
   return (
     <>
@@ -25,11 +20,18 @@ export default function HomeView() {
     
 
     <nav className="my-5">
+    <button
+        className="bg-purple-400 hover:bg-purple-600 px-10 py-3 text-white text-xl font-bold cursor-pointer transition-colors"
+        onClick = {() =>  navigate('/pve/create')}
+      >
+        Un jugador
+      </button>
+
       <button
         className="bg-purple-400 hover:bg-purple-600 px-10 py-3 text-white text-xl font-bold cursor-pointer transition-colors"
-        onClick = {handleRedirectEnter}
+        onClick = {() =>  navigate('/pvp/create')}
       >
-        Entrar
+        Multijugador
       </button>
     </nav>
     

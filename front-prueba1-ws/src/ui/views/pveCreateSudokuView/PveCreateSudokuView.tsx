@@ -1,12 +1,12 @@
 import { useContext, useMemo, useState } from "react"
-import { SocketContext } from "../../application/context/socketContext"
+import { SocketContext } from "../../../application/context/socketContext"
 import { Listbox } from "@headlessui/react"
 import { useNavigate } from "react-router-dom"
-import { Difficulty, diffOptions, SocketCResponse } from "../../domain/";
-import { useAppStore } from "../../application/store/useAppStore";
+import { Difficulty, diffOptions, SocketCResponse } from "../../../domain";
+import { useAppStore } from "../../../application/store/useAppStore";
 import { toast } from "react-toastify";
 
-export default function CreateSudokuView() {
+export default function PveCreateSudokuView() {
 
   const navigate = useNavigate();
   const [difSelected, setDifSelected] = useState<string>("");
@@ -16,15 +16,15 @@ export default function CreateSudokuView() {
   const setStartedSudokuState = useAppStore(state => state.setStartedSudokuState);
   const { socket, online } = useContext(SocketContext);
   const [lastGameId, setLastGameId] = useState<string | null>(
-    localStorage.getItem('sudokuRoom')
-    ? localStorage.getItem('sudokuRoom') : null
+    localStorage.getItem('sudokuRoomPve')
+    ? localStorage.getItem('sudokuRoomPve') : null
   )
 
 
   const handleSudokuCreate = () => {
     if (difficulty) {
 
-      socket.emit('request-sudoku', "pve", difficulty, (response: SocketCResponse) => {
+      socket.emit('request-sudoku-pve', difficulty, (response: SocketCResponse) => {
         if (response.success) {
           console.log('Sudoku recibido')
           setInnitialSudokuState(response.payload);
@@ -33,7 +33,6 @@ export default function CreateSudokuView() {
           console.error('Error al crear el sudoku')
         }
       });
-      /* setDifficulty(difficulty); */
     }
 
   }
@@ -59,6 +58,9 @@ export default function CreateSudokuView() {
   }
 
 
+  if (isLoading) {
+    return <div>Cargando partida...</div>;
+  }
 
   return (
     <>
@@ -127,7 +129,7 @@ export default function CreateSudokuView() {
               : 'cursor-pointer hover:bg-purple-600'}`}
           disabled={!lastGameId}
           onClick={handleLastGame}
-        >Volver a partida en marcha</button>
+        >Volver a la partida</button>
       </div>
 
       

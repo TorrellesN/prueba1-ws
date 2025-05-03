@@ -1,11 +1,27 @@
 import { ObjectId } from 'mongodb';
 import { collections } from '../../../context/db/mongodb.connection';
-import { CellToInsert, SudokuPVE } from '../../domain/Sudoku';
+import { CellToInsert, Difficulty, SudokuPVE, SudokuPVP } from '../../domain/Sudoku';
 import SudokuRepository from '../../domain/sudoku.repository';
-import { RolNumber } from '../../../users/domain/Player';
+import { newPlayer, RolNumber } from '../../../users/domain/Player';
+import { UserAuth } from '../../../users/domain/User';
+import { SudokuAndPlayer } from '../../../context/socketService/types';
 
 export default class SudokuRepositoryMongoDB implements SudokuRepository {
     
+    private getMongoPvpCollection = (difficulty: Difficulty) => {
+        let collection;
+        if (difficulty === 'easy') {
+            collection = collections.easyPvpSudoku;
+        } else if (difficulty === 'medium') {
+            collection = collections.mediumPvpSudoku;
+        } else if (difficulty === 'hard') {
+            collection = collections.hardPvpSudoku;
+        } else {
+            collection = collections.pvpSudoku; // default collection if needed
+        }
+        return collection;
+    }
+
     async insertSudokuPve(newSudoku: SudokuPVE): Promise<string> {
         const result = await collections.pveSudoku.insertOne(newSudoku);
         if (!result || !result.acknowledged) throw new Error('404');
@@ -100,4 +116,66 @@ export default class SudokuRepositoryMongoDB implements SudokuRepository {
         }
         return true;
     }
+
+
+    async findRoomsPvp(difficulty: Difficulty): Promise<string[]> {
+        // Use conditional logic to access the correct collection based on difficulty
+        const collection = this.getMongoPvpCollection(difficulty);
+        
+        const salasDisponibles = await collection.find({
+            status: 'new',
+            'players.3': { $exists: false } // Menos de 4 jugadores
+        }).toArray();
+        if (!salasDisponibles || salasDisponibles.length === 0) throw new Error('404');
+        const ids = salasDisponibles.map((sala) => sala._id.toString());
+        return ids;
+    }
+
+
+    async insertSudokuPvp(newSudoku: SudokuPVP): Promise<string> {
+        const collection = this.getMongoPvpCollection(newSudoku.difficulty);
+        const result = await collection.insertOne(newSudoku);
+        if (!result || !result.acknowledged) throw new Error('404');
+        return String(result.insertedId);
+    }
+
+
+    async getSudokuByIdPvp(sudokuId: string, difficulty: Difficulty): Promise<SudokuPVP> {
+        const collection = this.getMongoPvpCollection(difficulty);
+        const result = await collection.findOne({_id: new ObjectId(sudokuId)});
+        if (!result) throw new Error('404');
+        const { current, solved, emptyCellsCount, players } = result;
+        const sudokuPvp : SudokuPVP= { current, solved, difficulty, emptyCellsCount, players, id: sudokuId }; 
+        return sudokuPvp;
+    }
+
+
+    async joinUserToSudokuPvp(user: UserAuth, sudokuId: string, difficulty: Difficulty): Promise<SudokuAndPlayer> {
+        const collection = this.getMongoPvpCollection(difficulty);
+        const resultSudokuObj = await this.getSudokuByIdPvp(sudokuId, difficulty);
+        
+        const numberOfPlayers = resultSudokuObj.players.length;
+        if (numberOfPlayers >= 4) throw new Error('409');
+        
+        const rols: RolNumber[] = [1, 2, 3, 4];
+        const takenRols = resultSudokuObj.players.map(player => player.rol);
+        const freeRols = rols.filter(rol => !takenRols.includes(rol));
+        const player =  newPlayer(user, freeRols[0] );
+
+        const result = await collection.updateOne(
+            { _id: new ObjectId(sudokuId) },
+            {
+                $push: {
+                    players: player
+                }
+            } as Object,
+        );
+
+        if (!result || !result.acknowledged) throw new Error('404');
+        return { sudoku: resultSudokuObj, player }; 
+    }
+
+
 }
+
+

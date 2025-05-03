@@ -6,7 +6,7 @@ import { Server } from 'socket.io';
 import { createMongoConnectionDefault } from './context/db/mongodb.connection';
 import { corsConfig } from './context/security/cors.config';
 import configureAppRoutes from './services/app.routes';
-import configureSocket from './services/socket.connection';
+import configureSocket from './context/socketService/socket.connection';
 const swaggerUi = require("swagger-ui-express");
 const swaggerDocument = require("../doc/swagger.json");
 

@@ -14,12 +14,14 @@ export type SudokuStateType = {
   rol: RolNumber | null,
   setInnitialSudokuState: (sudoku: SudokuPVE | SudokuPVP) => void,
   setStartedSudokuState: (sudoku: SudokuPVE | SudokuPVP) => void,
+  setSelfPlayer: (player: Player) => void,
   restartSudokuState: () => void,
   calculatePoints: () => number,
   isCorrectNumber: (number: number, row: number, col: number) => boolean,
   savePVEMove: (cellToInsert: CellToInsert, calculatedPoints: number) => void,
   resetCombo: () => void,
-  fillEmptyCells: () => void
+  fillEmptyCells: () => void,
+  setFinishedState: () => void
 }
 
 
@@ -40,7 +42,6 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
 
   //TODO: para cuando haga pvp cambiar la condicional de participants?
   setInnitialSudokuState: (sudoku: SudokuPVE | SudokuPVP) => {
-    localStorage.setItem('sudokuRoom', sudoku.id!)
     set({
       id: sudoku.id,
       current: sudoku.current,
@@ -52,12 +53,14 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
       points: 0
     })
     if (!('players' in sudoku)) {
+      localStorage.setItem('sudokuRoomPve', sudoku.id!)
       set({ rol: 1 });
+    } else {
+      localStorage.setItem('sudokuRoomPvp', sudoku.id!)
     }
   },
 
   setStartedSudokuState: (sudoku: SudokuPVE | SudokuPVP) => {
-    localStorage.setItem('sudokuRoom', sudoku.id!)
     set({
       id: sudoku.id,
       current: sudoku.current,
@@ -65,8 +68,8 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
       status: 'started',
       players: 'players' in sudoku ? sudoku.players : [],
       difficulty: sudoku.difficulty,
-
     })
+
     //TODO: por el momento usar api para recoger algo del otro slice, más tarde implementar bien zustand
     const { email } = api.getState() as any;
 
@@ -76,14 +79,27 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
         points: sudoku.player?.points || 0,
         rol: 1
       })
+      localStorage.setItem('sudokuRoomPve', sudoku.id!)
+
     } else if ('players' in sudoku) {
       const player = sudoku.players.find((player: Player) => player.email === email)
       set({
         comboAcc: player?.comboAcc || 0,
         points: player?.points || 0,
-        rol: 1
+        rol: player?.rol
       })
+      localStorage.setItem('sudokuRoomPvp', sudoku.id!)
+
     }
+  },
+
+
+  setSelfPlayer: (player: Player) => {
+    set({
+      comboAcc: player?.comboAcc || 0,
+      points: player?.points || 0,
+      rol: player?.rol
+    })
   },
 
 
@@ -98,7 +114,7 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
       comboAcc: 0,
       points: 0
     })
-    localStorage.removeItem('sudokuRoom');
+    localStorage.removeItem('sudokuRoomPve');
   },
 
 
@@ -159,6 +175,12 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
     set({
       current: newCurrent
     })
+  },
+
+
+  setFinishedState: () => {
+    localStorage.removeItem('sudokuRoomPve');
+    set({ status: 'finished' })
   }
 
 })

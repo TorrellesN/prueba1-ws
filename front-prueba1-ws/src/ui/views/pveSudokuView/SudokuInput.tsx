@@ -3,10 +3,11 @@ import { useEffect } from "react";
 type sudokuInputProps = {
     handleInputNumber: (number: number) => void,
     points: number,
-    comboAcc: number
+    comboAcc: number,
+    selectedCell: { row: number; col: number } | null
 }
 
-export default function SudokuInput({handleInputNumber, points, comboAcc}: sudokuInputProps) {
+export default function SudokuInput({handleInputNumber, points, comboAcc, selectedCell}: sudokuInputProps) {
     const numbers = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
     useEffect(() => {
@@ -14,12 +15,9 @@ export default function SudokuInput({handleInputNumber, points, comboAcc}: sudok
           // Obtenemos el valor de la tecla presionada
           const key = event.key
           // Validamos que sea un número del 1 al 9
-          if (/^[1-9]$/.test(key)) {
-          console.log(Number(key));
-            
-            
+          if (/^[1-9]$/.test(key) && selectedCell !== null) {
             handleInputNumber(Number(key))
-            console.log(`Número ingresado: ${key}`)
+            console.log(key, selectedCell)
           }
         }
     
@@ -28,7 +26,7 @@ export default function SudokuInput({handleInputNumber, points, comboAcc}: sudok
         return () => {
           window.removeEventListener('keydown', handleKeyDown)
         }
-      }, [])
+      }, [handleInputNumber, selectedCell])
 
     return (
         <div className="flex justify-center">

@@ -1,8 +1,9 @@
 import { UserAuth } from "../../users/domain/User";
-import { buildPveBoard, CellToInsert, Difficulty, SudokuPVE } from "../domain/Sudoku";
+import { buildPveBoard, buildPvpBoard, CellToInsert, Difficulty, SudokuPVE, SudokuPVP } from "../domain/Sudoku";
 import { createSudokuGame, SudokuResult } from "../domain/sudokuGenerator";
 import SudokuRepository from '../domain/sudoku.repository';
 import { RolNumber } from "../../users/domain/Player";
+import { SudokuAndPlayer } from "../../context/socketService/types";
 
 export default class SudokuUseCases {
     constructor(private readonly sudokuRepository: SudokuRepository) { };
@@ -42,6 +43,21 @@ export default class SudokuUseCases {
     async finishNow(sudokuId: string): Promise<boolean> {
         return await this.sudokuRepository.finishNow(sudokuId);
     }
+
+    async createPvp(user: UserAuth, difficulty: Difficulty): Promise<SudokuAndPlayer> {
+
+        const sudokuGenerated: SudokuPVP = buildPvpBoard(user, difficulty);
+        const id = await this.sudokuRepository.insertSudokuPvp(sudokuGenerated);
+        sudokuGenerated.id = id;
+        return { sudoku:sudokuGenerated, player: { ...user, rol: 1 } };
+    };
     
+    async findRoomsPvp(diff: Difficulty): Promise<string[]> {
+        return await this.sudokuRepository.findRoomsPvp(diff);
+    }
+
+     async joinUserToSudokuPvp(user: UserAuth, sudokuId: string, difficulty: Difficulty): Promise<SudokuAndPlayer> {
+        return await this.sudokuRepository.joinUserToSudokuPvp(user, sudokuId, difficulty);
+     }
 
 }

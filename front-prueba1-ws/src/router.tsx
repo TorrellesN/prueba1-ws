@@ -4,14 +4,16 @@ import { useInitializeAuth } from "./application/hooks/useInitializeAuth";
 import AuthRoutes from "./routes/AuthRoutes";
 import PublicRoutes from "./routes/PublicRoutes";
 import AppLayout from "./ui/layouts/AppLayout";
-import CreateSudokuView from "./ui/views/CreateSudokuView";
+import PveCreateSudokuView from "./ui/views/pveCreateSudokuView/PveCreateSudokuView";
 import HomeView from "./ui/views/HomeView";
 import LoginView from "./ui/views/loginView/LoginView";
-import PVESudokuView from "./ui/views/pveSudokuView/PVESudokuView";
+import PveSudokuView from "./ui/views/pveSudokuView/PveSudokuView";
 import RegisterView from "./ui/views/registerView/RegisterView";
 import UserView from "./ui/views/UserView";
-import PVEGameWinView from "./ui/views/pveGameWinView/PVEGameWinView";
+import PveGameWinView from "./ui/views/pveGameWinView/PveGameWinView";
 import { useAppStore } from "./application/store/useAppStore";
+import PvpCreateSudokuView from "./ui/views/pvpCreateSudokuView/PvpCreateSudokuView";
+import PvpWaitingView from "./ui/views/pvpWaitingView/PvpWaitingView";
 
 export default function RouterApp() {
 
@@ -39,11 +41,14 @@ export default function RouterApp() {
                             <Route path="/auth/register" element={<RegisterView />} />
                         </Route>
 
-                        <Route element={<AuthRoutes isAuth={isAuth} redirectTo="/home" />}>
-                            <Route element={<UserView />} path="/" />
-                            <Route path="/pve/create" element={<CreateSudokuView />} />
-                            <Route path="/pve/sudoku" element={<PVESudokuView />} />
-                            <Route path="/pve/win" element={<PVEGameWinView />} />
+                        <Route element={<AuthRoutes isAuth={isAuth} redirectTo="/auth/login" />}>
+                            <Route element={<UserView />} path="/" index/>
+                            <Route path="/pve/create" element={<PveCreateSudokuView />} />
+                            <Route path="/pve/sudoku" element={<PveSudokuView />} />
+                            <Route path="/pve/win" element={<PveGameWinView />} />
+                            <Route path="/pvp/create" element={<PvpCreateSudokuView />} />
+                            <Route path="/pvp/waiting" element={<PvpWaitingView />} />
+                            
                         </Route>
 
                         {/* ruta pública por defecto */}

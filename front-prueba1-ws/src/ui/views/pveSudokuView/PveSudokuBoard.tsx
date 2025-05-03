@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { PlayerCell, PlayerSudokuBoard } from '../../../domain';
+import { PlayerCell } from '../../../domain';
 import { useAppStore } from '../../../application/store/useAppStore';
 
 
@@ -9,7 +9,7 @@ interface SudokuBoardProps {
   onCellClick: (row: number, col: number, free: boolean) => void
 }
 
-export default function PVESudokuBoard({ onCellClick }: SudokuBoardProps) {
+export default function PveSudokuBoard({ onCellClick }: SudokuBoardProps) {
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const currentSudoku = useAppStore(state => state.current);
