@@ -1,19 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { PlayerCell, PlayerSudokuBoard } from '../../../domain';
+import { useAppStore } from '../../../application/store/useAppStore';
 
 
 
 
 interface SudokuBoardProps {
-  currentSudoku: PlayerSudokuBoard;
   onCellClick: (row: number, col: number, free: boolean) => void
 }
 
-export default function PVESudokuBoard({ currentSudoku, onCellClick }: SudokuBoardProps) {
+export default function PVESudokuBoard({ onCellClick }: SudokuBoardProps) {
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
-
-  
+  const currentSudoku = useAppStore(state => state.current);
 
   const handleCellClick = (row: number, col: number, cell: PlayerCell) => {
     // Si la celda tiene rol 0, no se puede seleccionar pero sí destacar el número
@@ -135,6 +134,8 @@ export default function PVESudokuBoard({ currentSudoku, onCellClick }: SudokuBoa
       document.removeEventListener('mousedown', handleOutsideClick);
     };
   }, [boardRef]);
+
+
 
 
   if (!currentSudoku) {

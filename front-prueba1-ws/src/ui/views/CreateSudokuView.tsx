@@ -2,27 +2,29 @@ import { useContext, useMemo, useState } from "react"
 import { SocketContext } from "../../application/context/socketContext"
 import { Listbox } from "@headlessui/react"
 import { useNavigate } from "react-router-dom"
-import { Difficulty, diffOptions, socketCResponse } from "../../domain/";
+import { Difficulty, diffOptions, SocketCResponse } from "../../domain/";
 import { useAppStore } from "../../application/store/useAppStore";
+import { toast } from "react-toastify";
 
 export default function CreateSudokuView() {
 
   const navigate = useNavigate();
   const [difSelected, setDifSelected] = useState<string>("");
+  const [isLoading, setIsLoading] = useState(false);
   const difficulty = useMemo<Difficulty>(() => (Object.entries(diffOptions).find(([, val]) => val === difSelected)?.[0]) as Difficulty, [difSelected])
   const setInnitialSudokuState = useAppStore(state => state.setInnitialSudokuState);
-  const { socket } = useContext(SocketContext);
-  const lastGameId = useState<string | null>(
+  const setStartedSudokuState = useAppStore(state => state.setStartedSudokuState);
+  const { socket, online } = useContext(SocketContext);
+  const [lastGameId, setLastGameId] = useState<string | null>(
     localStorage.getItem('sudokuRoom')
     ? localStorage.getItem('sudokuRoom') : null
   )
 
 
-
   const handleSudokuCreate = () => {
     if (difficulty) {
 
-      socket.emit('request-sudoku', "pve", difficulty, (response: socketCResponse) => {
+      socket.emit('request-sudoku', "pve", difficulty, (response: SocketCResponse) => {
         if (response.success) {
           console.log('Sudoku recibido')
           setInnitialSudokuState(response.payload);
@@ -37,7 +39,23 @@ export default function CreateSudokuView() {
   }
 
   const handleLastGame = () => {
-    //TODO: rescataremos id de ls y datos de la partida de la bd --métodos en back
+    setIsLoading(true);
+    const sudokuId = lastGameId;
+    if (sudokuId && online) {
+      socket.emit('reconnect-to-pve-game', sudokuId, (response: SocketCResponse) => {
+        if (response.success) {
+          setStartedSudokuState(response.payload);
+          setIsLoading(false);
+          navigate(`/pve/sudoku`);
+        } else {
+          console.error('Error al reconectar', response.payload);
+          setIsLoading(false);
+        }
+      });
+    } else if (!lastGameId) {
+      toast.error('No hay ninguna partida en curso');
+      setIsLoading(false);
+    }
   }
 
 
@@ -102,15 +120,14 @@ export default function CreateSudokuView() {
           Generar sudoku
         </button>
 
-        {lastGameId ? 
-      (
         <button
-          className="bg-purple-400 hover:bg-purple-600 px-10 py-3 text-white text-xl font-bold cursor-pointer transition-colors"
-
+          className={`bg-purple-400  text-white text-xl font-bold transition-colors px-10 py-3
+            ${!lastGameId
+              ? 'opacity-50 cursor-default'
+              : 'cursor-pointer hover:bg-purple-600'}`}
+          disabled={!lastGameId}
           onClick={handleLastGame}
         >Volver a partida en marcha</button>
-      ) : ''  
-    }
       </div>
 
       
@@ -121,3 +138,5 @@ export default function CreateSudokuView() {
     </>
   )
 }
+
+

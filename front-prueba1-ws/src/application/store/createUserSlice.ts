@@ -5,7 +5,6 @@ import { RolNumber } from "../../domain";
 export type AuthStateType = {
   user: User,
   token: string | null,
-  rol: RolNumber | null,
   setLoginState: (userLoged: UserLogedData) => void,
   logout: () => void,
   /* setToken: (newToken: string) => void */
@@ -32,7 +31,6 @@ const updateToken = (callbackReEvaluate: (token: string) => void, newToken: stri
 export const createUserSlice: StateCreator<AuthStateType> = (set, get, api) => ({
   user: userInitialState,
   token: null,
-  rol: null,
 
 
   setLoginState: (userLoged: UserLogedData) => {
@@ -59,9 +57,7 @@ export const createUserSlice: StateCreator<AuthStateType> = (set, get, api) => (
     set({ token: newToken });
   }, */
 
-  setRol: (rol: RolNumber) => {
-    set({ rol: rol });
-  }
+
 
 })
 

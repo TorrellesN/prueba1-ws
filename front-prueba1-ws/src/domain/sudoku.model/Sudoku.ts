@@ -1,4 +1,4 @@
-import { Participant, RolNumber } from "../user.model/UserModel";
+import { Player, RolNumber } from "../user.model/UserModel";
 
 export type Difficulty = "easy" | "medium" | "hard";
 export type SudokuStatus = "started" | "finished";
@@ -24,8 +24,8 @@ export interface SudokuPVP {
   difficulty: Difficulty,
   status: SudokuStatus,
   createdAt?: Date,
-  participants: Participant[]
+  players: Player[]
 }
 
-export interface SudokuPVE extends Omit<SudokuPVP, 'participants'> {}
+export interface SudokuPVE extends Omit<SudokuPVP, 'players'> {player?: Player}
 

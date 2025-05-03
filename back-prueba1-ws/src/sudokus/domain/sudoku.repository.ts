@@ -7,5 +7,7 @@ export default interface SudokuRepository {
     insertSudokuMovePve (sudokuId: string, cellToInsertPvp: CellToInsert, pointsForSaving: number): Promise<SudokuPVE>,
     resetComboPve (sudokuId: string): Promise<boolean>,
     finishGamePve (sudokuId: string): Promise<boolean>,
-    leaveGamePve(sudokuId: string): Promise<boolean>
+    leaveGamePve(sudokuId: string): Promise<boolean>,
+    getSudokuByIdPve(sudokuId: string): Promise<SudokuPVE>,
+    finishNow(sudokuId: string): Promise<boolean>,
 }

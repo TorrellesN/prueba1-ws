@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react'
 import { SocketContext } from '../../../application/context/socketContext'
-import { Link, Navigate, useNavigate } from 'react-router-dom';
+import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppStore } from '../../../application/store/useAppStore';
 import PVESudokuBoard from './PVESudokuBoard';
 import SudokuInput from './SudokuInput';
@@ -10,27 +10,74 @@ import QuitGameModal from './QuitGameModal';
 
 export default function PVESudokuView() {
 
-  const navigate = useNavigate();
-  const { socket, online } = useContext(SocketContext);
   const token = useAppStore((state) => state.token);
   const user = useAppStore((state) => state.user);
   const points = useAppStore((state) => state.points);
   const comboAcc = useAppStore((state) => state.comboAcc);
-  const current = useAppStore((state) => state.current);
   const isCorrectNumber = useAppStore((state) => state.isCorrectNumber);
   const calculatePoints = useAppStore((state) => state.calculatePoints);
   const savePVEMove = useAppStore((state) => state.savePVEMove);
   const resetCombo = useAppStore((state) => state.resetCombo);
+  const setStartedSudokuState = useAppStore((state) => state.setStartedSudokuState);
+  const fillEmptyCells = useAppStore((state) => state.fillEmptyCells);
+  const restartSudokuState = useAppStore((state) => state.restartSudokuState);
+
+  const navigate = useNavigate();
+  const { socket, online } = useContext(SocketContext);
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
-  let [isOpenModal, setIsOpenModal] = useState(false)
+  const [isOpenModal, setIsOpenModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [searchParams] = useSearchParams();
+  const finishnow = searchParams.get('finishnow');
+
+
+  const handleFinishNow = () => {
+    if (finishnow && finishnow === 'true') {
+      socket.emit('finish-now', (response: SocketCResponse) => {
+        console.log('response', response);
+        if (response.success) {
+          fillEmptyCells();
+          /* dfgdfgdfgfg */
+        } else {
+          console.error('No se ha podido completar');
+        }
+      });
+    };
+  }
+
+
+  useEffect(() => {
+    setIsLoading(true);
+    // Intentar recuperar los datos de la partida desde localStorage o la BD
+    const sudokuId = localStorage.getItem('sudokuRoom');
+    if (sudokuId && online) {
+      // Recuperar datos de la partida
+      socket.emit('reconnect-to-pve-game', sudokuId, (response: SocketCResponse) => {
+        if (response.success) {
+          setStartedSudokuState(response.payload);
+          handleFinishNow();
+          setIsLoading(false);
+          
+        } else {
+          console.error('Error al reconectar', response.payload);
+          navigate('/pve/create');
+        }
+      });
+    } else if (!sudokuId) {
+      // Si no hay roomId en ls, redirigir a la página de creación de Sudoku
+      navigate('/pve/create');
+    }
+
+  }, [online]);
+
 
   const open = () => {
     setIsOpenModal(true)
   }
-
   const close = () => {
     setIsOpenModal(false)
   }
+
 
   const handleCellClick = (row: number, col: number, free: boolean) => {
     if (free) {
@@ -57,7 +104,7 @@ export default function PVESudokuView() {
             console.error(response.payload);
             toast.error(response.payload);
           }
-          if (response.success && response.payload === 'finished') toast.success('¡Partida terminada!')
+          if (response.success && response.payload === 'finished') toast.success('¡Ganaste!')
         });
 
       } else {
@@ -76,27 +123,29 @@ export default function PVESudokuView() {
 
   useEffect(() => {
     socket.on('sudoku-finished', (data)=>{
-      console.log('sfgf')
       navigate('/pve/win')
     })
     return (() => {
       socket.off('sudoku-finished')
-      /* socket.emit('quit-pve-game') */
     })
-  }, [])
+  }, []);
 
 
   const handleQuit = () => {
     socket.emit('quit-pve-game')
-    localStorage.removeItem('sudokuRoom')
+    restartSudokuState();
     navigate('/')
   }
 
 
-
-  if (!online) {
+  //TODO: tal vez en el futuro deba borrarse esto debido a que ws es inestable y se puede desconectar.
+  //actualmente se ejecutan estos cambios en un useEffect para evitar errores de render
+  if (!online && !isLoading) {
     toast.error('Hubo un error de conexión, inténtalo de nuevo en unos minutos.');
     return (<Navigate to="/pve/create" replace />);
+  }
+  if (isLoading) {
+    return <div>Cargando partida...</div>;
   }
   if (!token) return (<p className="text-2xl font-light text-gray-500 mt-5">
     Necesitas autenticarte para poder jugar. <Link to={'/auth/login'}>Iniciar sesión</Link>
@@ -117,7 +166,7 @@ export default function PVESudokuView() {
 
         {/* Sudoku en el centro */}
         <div className="w-full sm:col-span-3">
-          <PVESudokuBoard currentSudoku={current} onCellClick={handleCellClick} />
+          <PVESudokuBoard onCellClick={handleCellClick} />
         </div>
 
         {/* Contenedor de la izquierda (abajo en móvil) */}

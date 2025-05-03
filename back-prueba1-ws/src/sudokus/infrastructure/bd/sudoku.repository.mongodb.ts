@@ -6,7 +6,6 @@ import { RolNumber } from '../../../users/domain/Player';
 
 export default class SudokuRepositoryMongoDB implements SudokuRepository {
     
-    
     async insertSudokuPve(newSudoku: SudokuPVE): Promise<string> {
         const result = await collections.pveSudoku.insertOne(newSudoku);
         if (!result || !result.acknowledged) throw new Error('404');
@@ -71,6 +70,34 @@ export default class SudokuRepositoryMongoDB implements SudokuRepository {
     async leaveGamePve(sudokuId: string): Promise<boolean> {
         const result = await collections.pveSudoku.deleteOne({_id: new ObjectId(sudokuId)})
         if (!result.acknowledged || result.deletedCount === 0) return false;
+        return true;
+    }
+
+
+    async getSudokuByIdPve(sudokuId: string): Promise<SudokuPVE> {
+        const result = await collections.pveSudoku.findOne({_id: new ObjectId(sudokuId)});
+        if (!result) throw new Error('404');
+        const { current, solved, difficulty, emptyCellsCount, player } = result;
+        const sudokuPve : SudokuPVE= { current, solved, difficulty, emptyCellsCount, player, id: sudokuId }; 
+        return sudokuPve;
+    }
+
+
+    async finishNow(sudokuId: string): Promise<boolean> {
+        const result = await collections.pveSudoku.updateOne({_id: new ObjectId(sudokuId)}, {
+            $set: {
+                emptyCellsCount: 1
+            }
+        })
+
+        if (result.matchedCount === 0) {
+            const resultPvp = await collections.pvpSudoku.updateOne({_id: new ObjectId(sudokuId)}, {
+                $set: {
+                    emptyCellsCount: 1
+                }
+            })
+            if (resultPvp.matchedCount === 0 || resultPvp.modifiedCount === 0) return false;
+        }
         return true;
     }
 }

@@ -35,4 +35,13 @@ export default class SudokuUseCases {
         return await this.sudokuRepository.leaveGamePve(sudokuId);
     }
 
+    async getSudokuByIdPve(sudokuId: string): Promise<SudokuPVE> {
+        return await this.sudokuRepository.getSudokuByIdPve(sudokuId);
+    }
+
+    async finishNow(sudokuId: string): Promise<boolean> {
+        return await this.sudokuRepository.finishNow(sudokuId);
+    }
+    
+
 }

@@ -7,7 +7,7 @@ import SudokuRepositoryMongoDB from "../sudokus/infrastructure/bd/sudoku.reposit
 import { log } from "node:console";
 
 const sudokuUseCases: SudokuUseCases = new SudokuUseCases(new SudokuRepositoryMongoDB());
-type socketCallback = (response: { success: boolean, payload: any }) => void
+type SocketCallback = (response: { success: boolean, payload: any }) => void
 
 export default function configureSocket(io: Server) {
     io.on('connection', (socket) => {
@@ -20,7 +20,7 @@ export default function configureSocket(io: Server) {
         const user = decryptedUser as UserAuth;
 
 
-        socket.on('request-sudoku', async (gameMode: 'pve' | 'pvp', difficulty: Difficulty, callback: socketCallback) => {
+        socket.on('request-sudoku', async (gameMode: 'pve' | 'pvp', difficulty: Difficulty, callback: SocketCallback) => {
 
             if (typeof callback === 'function') {
                 try {
@@ -35,7 +35,7 @@ export default function configureSocket(io: Server) {
 
         });
 
-        socket.on('save-pve-move', async (cellToInsert: CellToInsert, pointsForSaving: number, callback: socketCallback) => {
+        socket.on('save-pve-move', async (cellToInsert: CellToInsert, pointsForSaving: number, callback: SocketCallback) => {
             //TODO: cuando implemente ls, igual es mejor rescatar room de los params de los headers del socket
             try {
                 const sudokuRoom = Array.from(socket.rooms).find((room) => room !== socket.id);
@@ -55,7 +55,7 @@ export default function configureSocket(io: Server) {
                         //TODO: en pvp añadimos logica para ganadores/perdedores. en pve no suma nada en la liga.
                         await sudokuUseCases.finishGamePve(sudokuRoom);
 
-                        socket.to(sudokuRoom).emit('sudoku-finished', { message: 'partida terminada' });
+                        io.to(sudokuRoom).emit('sudoku-finished', { message: 'partida terminada' });
                         callback({ success: true, payload: 'finished' });
 
                     } catch (error) {
@@ -89,7 +89,7 @@ export default function configureSocket(io: Server) {
         })
 
 
-        socket.on('reset-pve-combo', async (callback: socketCallback) => {
+        socket.on('reset-pve-combo', async (callback: SocketCallback) => {
             try {
                 const sudokuId = Array.from(socket.rooms).find((room) => room !== socket.id);
 
@@ -111,6 +111,33 @@ export default function configureSocket(io: Server) {
                 console.log(error)
             }
 
+        })
+
+
+        socket.on('reconnect-to-pve-game', async (sudokuId: string, callback: SocketCallback) => {
+            try {
+                const sudokuObj = await sudokuUseCases.getSudokuByIdPve(sudokuId);
+                socket.join(sudokuId);
+                callback({ success: true, payload: sudokuObj });
+            } catch (error) {
+                if (typeof callback === 'function') callback({ success: false, payload: '' });
+                
+            }
+        })
+
+
+        socket.on('finish-now', async (callback: SocketCallback) => {
+            try {
+                const sudokuId = Array.from(socket.rooms).find((room) => room !== socket.id);
+                if (!sudokuId && typeof callback === 'function') callback({ success: false, payload: 'No room' });
+                console.log('sudokuId: ', sudokuId);
+                const isFinishingUpdate = await sudokuUseCases.finishNow(sudokuId!);
+                if (isFinishingUpdate && typeof callback === 'function') callback({ success: true, payload: '' });
+                if (!isFinishingUpdate && typeof callback === 'function') callback({ success: false, payload: '' });
+            } catch (error) {
+                console.log(error)
+                if (typeof callback === 'function') callback({ success: false, payload: '' });
+            }
         })
 
 
