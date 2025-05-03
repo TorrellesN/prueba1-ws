@@ -8,7 +8,7 @@ export type AuthStateType = {
   rol: RolNumber | null,
   setLoginState: (userLoged: UserLogedData) => void,
   logout: () => void,
-  setToken: (newToken: string) => void
+  /* setToken: (newToken: string) => void */
 
   // setToken: React.Dispatch<React.SetStateAction<string | null>>,
   // setUser: React.Dispatch<React.SetStateAction<User>>
@@ -55,9 +55,9 @@ export const createUserSlice: StateCreator<AuthStateType> = (set, get, api) => (
     localStorage.removeItem('token')
   },
 
-  setToken: (newToken: string) => {
+  /* setToken: (newToken: string) => {
     set({ token: newToken });
-  },
+  }, */
 
   setRol: (rol: RolNumber) => {
     set({ rol: rol });
@@ -66,17 +66,3 @@ export const createUserSlice: StateCreator<AuthStateType> = (set, get, api) => (
 })
 
 
-
-
-// Función auxiliar para refrescar el token (ejemplo)
-/* async function refreshToken(oldToken: string): Promise<string> {
-    // Implementa tu lógica de renovación de token aquí
-    const response = await fetch('/api/refresh-token', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${oldToken}`
-      }
-    });
-    const data = await response.json();
-    return data.token;
-  } */

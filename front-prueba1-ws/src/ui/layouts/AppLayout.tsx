@@ -1,10 +1,28 @@
-import { Link, Outlet } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import { toast, ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 import NavMenu from "../components/sharedComponents/NavMenu";
 import Logo from "../components/sharedComponents/Logo";
+import { useEffect } from "react";
 
-export default function AppLayout() {
+type AppLayoutProps = {
+  expiredTokenProps: {
+    isExpired: boolean;
+    decodedToken: unknown;
+  };
+};
+
+export default function AppLayout({expiredTokenProps}: AppLayoutProps) {
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (expiredTokenProps.isExpired && expiredTokenProps.decodedToken) {
+      toast.warning('Tu sesión ha caducado, debes volver a logearte.')
+      navigate('/auth/login')
+    }
+  }, [expiredTokenProps.isExpired])
+
+
   return (
     <div className="min-h-screen">
       <header className="bg-gray-800 py-5">

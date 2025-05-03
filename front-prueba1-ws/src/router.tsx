@@ -1,7 +1,6 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { SocketProvider } from "./application/context/socketContext";
 import { useInitializeAuth } from "./application/hooks/useInitializeAuth";
-import { useAppStore } from "./application/store/useAppStore";
 import AuthRoutes from "./routes/AuthRoutes";
 import PublicRoutes from "./routes/PublicRoutes";
 import AppLayout from "./ui/layouts/AppLayout";
@@ -12,19 +11,20 @@ import PVESudokuView from "./ui/views/pveSudokuView/PVESudokuView";
 import RegisterView from "./ui/views/registerView/RegisterView";
 import UserView from "./ui/views/UserView";
 import PVEGameWinView from "./ui/views/pveGameWinView/PVEGameWinView";
+import { useAppStore } from "./application/store/useAppStore";
 
 export default function RouterApp() {
 
-    const { isInitialized } = useInitializeAuth();
-
-
-
+    const { isInitialized, decodedToken, isExpired } = useInitializeAuth();
     const token = useAppStore(state => state.token)
+
+
     const isAuth = Boolean(token);
 
     if (!isInitialized) {
         return <div>Cargando...</div>;
     }
+
 
     return (
         <BrowserRouter>
@@ -32,7 +32,7 @@ export default function RouterApp() {
                 <Routes>
 
 
-                    <Route element={<AppLayout />}>
+                    <Route element={<AppLayout expiredTokenProps={{isExpired, decodedToken}}/>}>
 
                         <Route element={<PublicRoutes isAuth={isAuth} redirectTo="/" />}>
                             <Route path="/auth/login" element={<LoginView />} />

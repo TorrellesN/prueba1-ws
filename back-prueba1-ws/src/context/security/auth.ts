@@ -46,33 +46,6 @@ const isAuth = (req: Request, response: Response, next: NextFunction) => {
   }
 };
 
-/* const isTienda = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-      if (!req.body.auth.marca) {
-        throw new Error('Usuario no autorizado.')
-      }
-
-      next();
-      
-    } catch (error) {
-      res.status(401).send(String(error))
-    }
-  
-}
-
-const isUser = (req: Request, res: Response, next: NextFunction) => {
-  try {
-    if (req.body.auth.marca) {
-      throw new Error('Usuario no autorizado.')
-    }
-    console.log('Usuario autorizado');
-    next();
-    
-  } catch (error) {
-    res.status(401).send({message: String(error)})
-  }
-
-} */
 
   const decryptJWT = (token: string): UserAuth | {response: string} => {
     try {

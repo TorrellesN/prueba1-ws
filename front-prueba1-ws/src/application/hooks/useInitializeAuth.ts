@@ -1,15 +1,14 @@
 import { useEffect, useState } from "react";
-import { useAppStore } from "../store/useAppStore";
 import { useJwt } from "react-jwt";
+import { useAppStore } from "../store/useAppStore";
 
 export function useInitializeAuth() {
   const setLoginState = useAppStore((state) => state.setLoginState);
   const logout = useAppStore((state) => state.logout);
-  const setToken = useAppStore((state) => state.setToken);
-  const [isInitialized, setIsInitialized] = useState(false)
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const storedToken = localStorage.getItem("token");
-  const { decodedToken, isExpired, reEvaluateToken } = useJwt(storedToken || "");
+  const { decodedToken, isExpired } = useJwt(storedToken || "");
   
   useEffect(() => {
     if (!storedToken) {
@@ -32,19 +31,10 @@ export function useInitializeAuth() {
       setIsInitialized(true);
       
     } else {
-      try {
-        //TODO: logica peticion renovar token:
-        // const newToken = await refreshToken(storedToken);
-        reEvaluateToken("newToken");
-        setToken("newToken")
-      } catch (error) {
-        localStorage.removeItem("token");
         logout();
-      } finally {
         setIsInitialized(true);
-      }
     }
   }, [decodedToken]); //recordar que usejwt es asíncrono
 
-  return { isInitialized, decodedToken };
+  return { isInitialized, decodedToken, isExpired };
 }

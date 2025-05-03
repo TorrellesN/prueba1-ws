@@ -90,6 +90,29 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
         comboAcc: state.comboAcc >= 10 ? 10 : state.comboAcc + 1
       }))
     
+  },
+
+
+  fillEmptyCells: () => {
+    const rol = 1;
+    
+    const {current, solved} = get();
+    const newCurrent = current;
+    
+    for (let row = 0; row < 9; row++) {
+      for (let col = 0; col < 9; col++) {
+        if (current[row][col] === null) {
+          newCurrent[row][col] = solved[row][col];
+          set({
+            current
+          })
+          
+          
+        }
+      }
+    }
+    
+    return filledBoard;
   }
 
 
