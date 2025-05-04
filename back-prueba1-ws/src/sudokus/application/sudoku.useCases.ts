@@ -49,15 +49,19 @@ export default class SudokuUseCases {
         const sudokuGenerated: SudokuPVP = buildPvpBoard(user, difficulty);
         const id = await this.sudokuRepository.insertSudokuPvp(sudokuGenerated);
         sudokuGenerated.id = id;
-        return { sudoku:sudokuGenerated, player: { ...user, rol: 1 } };
+        return { sudoku: sudokuGenerated, player: { ...user, rol: 1 } };
     };
-    
+
     async findRoomsPvp(diff: Difficulty): Promise<string[]> {
         return await this.sudokuRepository.findRoomsPvp(diff);
     }
 
-     async joinUserToSudokuPvp(user: UserAuth, sudokuId: string, difficulty: Difficulty): Promise<SudokuAndPlayer> {
+    async joinUserToSudokuPvp(user: UserAuth, sudokuId: string, difficulty: Difficulty): Promise<SudokuAndPlayer> {
         return await this.sudokuRepository.joinUserToSudokuPvp(user, sudokuId, difficulty);
-     }
+    }
+
+    async quitUserFromSudokuPvp(email: string, sudokuId: string, difficulty: Difficulty): Promise<boolean> {
+        return await this.sudokuRepository.quitUserFromSudokuPvp(email, sudokuId, difficulty);
+    }
 
 }

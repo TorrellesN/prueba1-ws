@@ -6,7 +6,8 @@ import PveSudokuBoard from './PveSudokuBoard';
 import SudokuInput from './SudokuInput';
 import { toast } from 'react-toastify';
 import { SocketCResponse } from '../../../domain';
-import QuitGameModal from './QuitGameModal';
+import QuitGameModal from '../../components/sharedComponents/quitGameModal/QuitGameModal';
+import { useQuitGameModal } from '../../components/sharedComponents/quitGameModal/useQuitGameModal';
 
 export default function PVESudokuView() {
 
@@ -26,11 +27,10 @@ export default function PVESudokuView() {
   const navigate = useNavigate();
   const { socket, online } = useContext(SocketContext);
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
-  const [isOpenModal, setIsOpenModal] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [searchParams] = useSearchParams();
   const finishnow = searchParams.get('finishnow');
-
+  const {open, close, isOpenModal} = useQuitGameModal();
 
   const handleFinishNow = () => {
     if (finishnow && finishnow === 'true') {
@@ -72,12 +72,7 @@ export default function PVESudokuView() {
   }, [online]);
 
 
-  const open = () => {
-    setIsOpenModal(true)
-  }
-  const close = () => {
-    setIsOpenModal(false)
-  }
+
 
 
   const handleCellClick = (row: number, col: number, free: boolean) => {

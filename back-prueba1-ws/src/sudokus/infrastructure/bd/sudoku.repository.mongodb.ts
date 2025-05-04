@@ -176,6 +176,22 @@ export default class SudokuRepositoryMongoDB implements SudokuRepository {
     }
 
 
+    async quitUserFromSudokuPvp(email: string, sudokuId: string, difficulty: Difficulty): Promise<boolean> {
+        const collection = this.getMongoPvpCollection(difficulty);
+        const result = await collection.updateOne(
+            { _id: new ObjectId(sudokuId) },
+            {
+                $pull: {
+                   players: { email: email }
+                }
+            } as Object,
+        );
+
+        if (result.matchedCount === 0 || result.modifiedCount === 0) return false;
+        return true;
+    }
+
+
 }
 
 

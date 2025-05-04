@@ -1,9 +1,8 @@
 @import "tailwindcss";
 
-    /* Tema claro por defecto */
-
+/* Base theme (light mode) */
 :root {
-  /* Colores */
+  /* Theme colors - light mode defaults */
   --primary-color: #3b82f6;     /* blue-500 */
   --secondary-color: #10b981;   /* emerald-500 */
   --accent-color: #f59e0b;      /* amber-500 */
@@ -14,27 +13,32 @@
   --text-color: #1f2937;        /* gray-800 */
   --text-color-secondary: #4b5563; /* gray-600 */
   --border-color: #e5e7eb;      /* gray-200 */
-
-  /* Colores de rol */
-  --rol-1-base-color: #643bf6; /* blue-500 */
-    --rol-2-base-color: #10b981; /* emerald-500 */
-    --rol-3-base-color: #e69010; /* amber-500 */
-    --rol-4-base-color: #d13f5e; /* red-500 */
-    --rol-1-light-color: #c7bbf0; /* blue-500 */
-    --rol-2-light-color: #afdbcd; /* emerald-500 */
-    --rol-3-light-color: #ebd3af; /* amber-500 */
-    --rol-4-light-color: #f3b6c3; /* red-500 */
-    --rol-1-contrast-color: #392191; /* blue-500 */
-    --rol-2-contrast-color: #096d4c; /* emerald-500 */
-    --rol-3-contrast-color: #684108; /* amber-500 */
-    --rol-4-contrast-color: #682231; /* red-500 */
   
-  /* variables que no cambian con el tema */
+  /* Color neutral variables that don't change with theme */
   --light-color: #f3f4f6;       /* gray-100 */
   --dark-color: #1f2937;        /* gray-800 */
   
-
-
+  /* Font sizes */
+  --font-xs: 0.75rem;           /* 12px */
+  --font-sm: 0.875rem;          /* 14px */
+  --font-base: 1rem;            /* 16px */
+  --font-lg: 1.125rem;          /* 18px */
+  --font-xl: 1.25rem;           /* 20px */
+  --font-2xl: 1.5rem;           /* 24px */
+  
+  /* Spacing */
+  --space-1: 0.25rem;           /* 4px */
+  --space-2: 0.5rem;            /* 8px */
+  --space-3: 0.75rem;           /* 12px */
+  --space-4: 1rem;              /* 16px */
+  --space-6: 1.5rem;            /* 24px */
+  --space-8: 2rem;              /* 32px */
+  
+  /* Border radius */
+  --radius-sm: 0.125rem;        /* 2px */
+  --radius-md: 0.375rem;        /* 6px */
+  --radius-lg: 0.5rem;          /* 8px */
+  --radius-full: 9999px;
   
   /* Transitions */
   --transition-normal: 0.2s ease;
@@ -79,27 +83,7 @@ body {
   transition: background-color var(--transition-normal), color var(--transition-normal);
 }
 
-
 /* Custom utility classes */
-
-/* Player rol classes */
-.rol-1-card-colors {
-  background-color: var(--rol-1-light-color);
-  color: var(--rol-1-contrast-color);
-}
-.rol-2-card-colors {
-  background-color: var(--rol-2-light-color);
-  color: var(--rol-2-contrast-color);
-}
-.rol-3-card-colors {
-  background-color: var(--rol-3-light-color);
-  color: var(--rol-3-contrast-color);
-}
-.rol-4-card-colors {
-  background-color: var(--rol-4-light-color);
-  color: var(--rol-4-contrast-color);
-}
-
 
 /* Button styles */
 .btn {
@@ -120,9 +104,45 @@ body {
   opacity: 0.9;
 }
 
+.btn-secondary {
+  background-color: var(--secondary-color);
+  color: white;
+}
 
+.btn-secondary:hover {
+  background-color: #059669; /* emerald-600 */
+}
 
+.btn-accent {
+  background-color: var(--accent-color);
+  color: white;
+}
 
+.btn-danger {
+  background-color: var(--danger-color);
+  color: white;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626; /* red-600 */
+}
+
+/* Card styles */
+.card {
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+  background-color: var(--bg-color);
+  border: 1px solid var(--border-color);
+}
+
+.card-primary {
+  border-top: 4px solid var(--primary-color);
+}
+
+.card-secondary {
+  border-top: 4px solid var(--secondary-color);
+}
 
 /* Text styles */
 .text-title {
@@ -141,4 +161,35 @@ body {
   color: #374151; /* gray-700 */
 }
 
+/* Layout helpers */
+.center-content {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.flex-col-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.grid-2x2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: var(--space-4);
+}
+
+/* Margin and padding helpers - with custom prefix to avoid conflicts */
+.custom-m-1 { margin: var(--space-1); }
+.custom-m-2 { margin: var(--space-2); }
+.custom-m-4 { margin: var(--space-4); }
+
+.custom-mt-1 { margin-top: var(--space-1); }
+.custom-mt-2 { margin-top: var(--space-2); }
+.custom-mt-4 { margin-top: var(--space-4); }
+
+.custom-p-1 { padding: var(--space-1); }
+.custom-p-2 { padding: var(--space-2); }
+.custom-p-4 { padding: var(--space-4); }
 

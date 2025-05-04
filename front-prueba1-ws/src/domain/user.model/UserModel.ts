@@ -12,6 +12,6 @@ export type User = z.infer<typeof UserSchema>;
 
 /* OTHER USER TYPES */
 
-export type Player = Pick<User, 'username' | 'profileImg' | 'email'> & {rol: RolNumber, comboAcc?: number, points?: number};
+export type Player = Pick<User, 'username' | 'profileImg' | 'email'> & {rol: RolNumber, comboAcc?: number, points?: number, ready?: boolean};
 
 export type RolNumber = 0 | 1 | 2 | 3 | 4;

@@ -14,6 +14,7 @@ export default interface SudokuRepository {
     findRoomsPvp(diff: Difficulty): Promise<string[]>,
     insertSudokuPvp (newSudoku: SudokuPVP): Promise<string>,
     getSudokuByIdPvp(sudokuId: string, difficulty: Difficulty): Promise<SudokuPVP>,
-    joinUserToSudokuPvp(user: UserAuth, sudokuId: string, difficulty: Difficulty): Promise<SudokuAndPlayer>
+    joinUserToSudokuPvp(user: UserAuth, sudokuId: string, difficulty: Difficulty): Promise<SudokuAndPlayer>,
+    quitUserFromSudokuPvp(email: string, sudokuId: string, difficulty: Difficulty): Promise<boolean>,
 
 }

@@ -1,5 +1,5 @@
 import { StateCreator } from "zustand";
-import { Difficulty, PlayerSudokuBoard, SudokuBoardSolved, SudokuStatus, Player, initialPVESudoku, SudokuPVE, SudokuPVP, CellToInsert, pointsPerCell, RolNumber } from "../../domain/";
+import { Difficulty, PlayerSudokuBoard, SudokuBoardSolved, SudokuStatus, Player, initialPVESudoku, SudokuPVE, SudokuPVP, CellToInsert, pointsPerCell, RolNumber, initialPVPSudoku } from "../../domain/";
 
 export type SudokuStateType = {
   id?: string,
@@ -7,7 +7,7 @@ export type SudokuStateType = {
   solved: SudokuBoardSolved,
   status: SudokuStatus,
   createdAt?: Date,
-  players?: Player[]
+  players: Player[]
   difficulty: Difficulty,
   comboAcc: number,
   points: number,
@@ -21,7 +21,10 @@ export type SudokuStateType = {
   savePVEMove: (cellToInsert: CellToInsert, calculatedPoints: number) => void,
   resetCombo: () => void,
   fillEmptyCells: () => void,
-  setFinishedState: () => void
+  setFinishedState: () => void,
+  addPLayer: (player: Player) => void,
+  removePlayer: (username: string) => void,
+  setReadyOrWaitingPlayer: (username: string) => void
 }
 
 
@@ -32,7 +35,7 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
   current: initialPVESudoku.current,
   solved: initialPVESudoku.solved,
   status: initialPVESudoku.status,
-  participants: [],
+  players: initialPVPSudoku.players,
   difficulty: initialPVESudoku.difficulty,
   comboAcc: 0,
   points: 0,
@@ -40,8 +43,12 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
 
 
 
-  //TODO: para cuando haga pvp cambiar la condicional de participants?
   setInnitialSudokuState: (sudoku: SudokuPVE | SudokuPVP) => {
+    
+    if ('players' in sudoku && sudoku.players.length > 0) {
+      sudoku.players.forEach((player: Player) => {player.ready = false});
+    }
+    
     set({
       id: sudoku.id,
       current: sudoku.current,
@@ -56,7 +63,12 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
       localStorage.setItem('sudokuRoomPve', sudoku.id!)
       set({ rol: 1 });
     } else {
-      localStorage.setItem('sudokuRoomPvp', sudoku.id!)
+     /*  const {players} = get();
+      if (players.length > 0) {
+        players.
+      } */
+      //se pone al iniciar la partida para no poder volver al sudoku si está en estado new en bd
+      /* localStorage.setItem('sudokuRoomPvp', sudoku.id!) */
     }
   },
 
@@ -94,15 +106,6 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
   },
 
 
-  setSelfPlayer: (player: Player) => {
-    set({
-      comboAcc: player?.comboAcc || 0,
-      points: player?.points || 0,
-      rol: player?.rol
-    })
-  },
-
-
   restartSudokuState: () => {
     set({
       id: '',
@@ -117,6 +120,43 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
     localStorage.removeItem('sudokuRoomPve');
   },
 
+
+  setSelfPlayer: (player: Player) => {
+    set({
+      comboAcc: player?.comboAcc || 0,
+      points: player?.points || 0,
+      rol: player?.rol,
+    })
+  },
+
+  addPLayer: (player: Player) => {
+    const { players } = get();
+    player.ready = false;
+    const newPlayers = [...players, player];
+    set({ players: newPlayers })
+  },
+
+
+  removePlayer: (username: string) => {
+    const { players } = get();
+    const newPlayers = players.filter((p) => p.username !== username);
+    set({ players: newPlayers })
+  },
+
+  setReadyOrWaitingPlayer: (username: string) => {
+    const { players } = get();
+    const newPlayers = players.map((p) => {
+      if (p.username === username) {
+        return { ...p, ready: true };
+      }
+      return p;
+    });
+    set({ players: newPlayers });
+    console.log('newPlayers', newPlayers)
+  },
+
+
+  
 
 
   calculatePoints: () => {
@@ -181,6 +221,7 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
   setFinishedState: () => {
     localStorage.removeItem('sudokuRoomPve');
     set({ status: 'finished' })
+    //TODO: poner el sudoku a 0 cuando cambien de la pantalla de finalizado. Mandar borrar sudoku a backend
   }
 
 })

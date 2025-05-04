@@ -2,6 +2,7 @@ import { Fragment } from 'react'
 import { Popover, Transition } from '@headlessui/react'
 import { Bars3Icon } from '@heroicons/react/20/solid'
 import { Link } from 'react-router-dom'
+import ThemeToggle from '../ThemeToggle'
 
 export default function NavMenu() {
 
@@ -38,6 +39,7 @@ export default function NavMenu() {
             >
               Cerrar Sesión
             </button>
+            <ThemeToggle />
           </div>
         </Popover.Panel>
       </Transition>

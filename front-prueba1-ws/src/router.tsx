@@ -14,12 +14,13 @@ import PveGameWinView from "./ui/views/pveGameWinView/PveGameWinView";
 import { useAppStore } from "./application/store/useAppStore";
 import PvpCreateSudokuView from "./ui/views/pvpCreateSudokuView/PvpCreateSudokuView";
 import PvpWaitingView from "./ui/views/pvpWaitingView/PvpWaitingView";
+import { initTheme } from "./ui/components/themeUtils";
 
 export default function RouterApp() {
 
     const { isInitialized, decodedToken, isExpired } = useInitializeAuth();
     const token = useAppStore(state => state.token)
-
+    initTheme();
 
     const isAuth = Boolean(token);
 

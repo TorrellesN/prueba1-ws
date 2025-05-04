@@ -3,6 +3,7 @@ import SudokuUseCases from "../../../sudokus/application/sudoku.useCases";
 import { UserAuth } from "../../../users/domain/User";
 import { Difficulty } from "../../../sudokus/domain/Sudoku";
 import { SocketCallback } from "../types";
+import { StringMap } from "ts-jest";
 
 
 export default function registerPvpEvents(
@@ -18,36 +19,36 @@ export default function registerPvpEvents(
     socket.on('request-sudoku-pvp', async (difficulty: Difficulty, callback: SocketCallback) => {
         console.log('Solicitud de sudoku PVP recibida')
         let roomIds: string[] = [];
-        
+
         try {
             roomIds = await sudokuUseCases.findRoomsPvp(difficulty);
-        } catch (error) { 
-            console.log('Error al buscar salas de sudoku: ' + error); 
+        } catch (error) {
+            console.log('Error al buscar salas de sudoku: ' + error);
         }
-    
+
         console.log('roomIds: ', roomIds);
-        
+
         if (roomIds.length !== 0) {
             for (const room of roomIds) {
                 console.log('Intentando unirse a la sala:', room)
-                
+
                 const roomExists = io.of("/").adapter.rooms.has(room);
                 console.log('roomExists: ', roomExists);
-                
+
                 if (roomExists) {
                     try {
                         const sudokuJoinedObj = await sudokuUseCases.joinUserToSudokuPvp(user, room, difficulty);
                         const sudokuJoined = sudokuJoinedObj.sudoku;
                         const player = sudokuJoinedObj.player;
-                        
+
                         socket.join(room);
                         io.to(room).emit('player-joined', player);
-                        
+
                         console.log('Jugador unido a sala existente:', room);
                         currentRoom = room;
                         currentDifficulty = difficulty;
-                        callback({ success: true, payload: { sudoku: sudokuJoined, player } });
-                        
+                        if (typeof callback === 'function') callback({ success: true, payload: { sudoku: sudokuJoined, player } });
+
                         return;
                     } catch (error) {
                         console.log('Error al unirse a la sala: sudoku con id ' + room + ' no existe o está llena, intentando en otra sala.');
@@ -55,26 +56,63 @@ export default function registerPvpEvents(
                 }
             }
         }
-        
+
         try {
             console.log('Creando nueva sala de sudoku')
             const sudokuPvpWithPlayer = await sudokuUseCases.createPvp(user, difficulty);
-            
+
             socket.join(sudokuPvpWithPlayer.sudoku.id!);
-            console.log('Nueva sala creada:', sudokuPvpWithPlayer.sudoku.id);
+            console.log('Nueva ', sudokuPvpWithPlayer.sudoku.id);
             currentRoom = sudokuPvpWithPlayer.sudoku.id!;
             currentDifficulty = difficulty;
-            
-            callback({ success: true, payload: sudokuPvpWithPlayer });
+            sudokuPvpWithPlayer.sudoku.players = [];
+            if (typeof callback === 'function') callback({ success: true, payload: sudokuPvpWithPlayer });
         } catch (error) {
             console.log('Error al crear el sudoku: ' + error);
-            callback({ success: false, payload: 'No se ha podido encontrar una sala de este nivel, vuelve a intentarlo más adelante' });
+            if (typeof callback === 'function') callback({ success: false, payload: 'No se ha podido encontrar una sala de este nivel, vuelve a intentarlo más adelante' });
         }
     })
 
 
-     // Manejar la desconexión del usuario
-     socket.on('disconnect', async () => {
+
+    socket.on('quit-pvp-waiting', async (sudokuId: string, callback: SocketCallback) => {
+        try {
+            const isRemoved = await sudokuUseCases.quitUserFromSudokuPvp(user.email, sudokuId, currentDifficulty!);
+            console.log('isRemoved: ', isRemoved);
+            const username = user.username;
+
+            if (isRemoved) {
+                socket.leave(sudokuId);
+                currentRoom = null;
+                currentDifficulty = null;
+                io.to(sudokuId).emit('player-disconnected', { username: username });
+                if (typeof callback === 'function') callback({ success: true, payload: 'Has salido de la sala' });
+            } else {
+                if (typeof callback === 'function') callback({ success: false, payload: 'No se ha podido salir de la sala' });
+            }
+        } catch (error) {
+            console.log('Error al salir de la sala: ' + error);
+            if (typeof callback === 'function') callback({ success: false, payload: 'No se ha podido salir de la sala' });
+        }
+    })
+
+
+    socket.on('set-ready', (sudokuId: string, username: string) => {
+        console.log('user-ready: ', sudokuId, username);
+        socket.to(sudokuId).emit('player-ready', { username: username });
+    });
+
+
+    socket.on('set-waiting', (sudokuId: string, username: string) => {
+        console.log('set-waiting', sudokuId, username);
+        socket.to(sudokuId).emit('player-waiting', { username: username });
+    });
+
+
+
+
+    // Manejar la desconexión del usuario
+    /*  socket.on('disconnect', async () => {
         console.log('Usuario desconectado:', user.username);
         
         // Si el usuario estaba en una sala
@@ -101,5 +139,5 @@ export default function registerPvpEvents(
                 console.error(`Error al procesar la desconexión para la sala ${currentRoom}:`, error);
             }
         }
-    });
+    }); */
 }

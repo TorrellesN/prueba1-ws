@@ -22,7 +22,7 @@ export const generateEmptyPlayerBoard = (): PlayerSudokuBoard => {
     solved: generateSolvedBoardWithOnes(),
     difficulty: "easy",
     status: "started",
-    participants: []
+    players: []
   };
   
   export const generateSolvedBoard = (): SudokuBoardSolved => {

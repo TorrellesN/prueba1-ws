@@ -48,11 +48,11 @@ export default function registerPveEvents(
                         await sudokuUseCases.finishGamePve(sudokuRoom);
 
                         io.to(sudokuRoom).emit('sudoku-finished', { message: 'partida terminada' });
-                        callback({ success: true, payload: 'finished' });
+                        if (typeof callback === 'function') callback({ success: true, payload: 'finished' });
 
                     } catch (error) {
                         console.log(error)
-                        callback({ success: false, payload: 'Lo sentimos, estamos teniendo problemas en servidor.' });
+                        if (typeof callback === 'function') callback({ success: false, payload: 'Lo sentimos, estamos teniendo problemas en servidor.' });
                     }
 
 
