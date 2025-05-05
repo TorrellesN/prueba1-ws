@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppStore } from "../../../application/store/useAppStore";
 import { useQuitGameModal } from "../../components/sharedComponents/quitGameModal/useQuitGameModal";
 import QuitGameModal from "../../components/sharedComponents/quitGameModal/QuitGameModal";
+import { cp } from "fs";
 
 export default function PvpWaitingView() {
 
@@ -20,6 +21,7 @@ export default function PvpWaitingView() {
   const removePlayer = useAppStore(state => state.removePlayer);
   const restartSudokuState = useAppStore(state => state.restartSudokuState);
   const setReadyOrWaitingPlayer = useAppStore(state => state.setReadyOrWaitingPlayer);
+  const areAllPlayersReady = useAppStore(state => state.areAllPlayersReady);
   const { open, close, isOpenModal } = useQuitGameModal();
   
   const [ready, setReady] = useState(false);
@@ -58,7 +60,9 @@ export default function PvpWaitingView() {
       setReady(false);
     }
     if (!ready) {
-      socket.emit('set-ready', id, user.username); 
+      const areAllReady = areAllPlayersReady();
+
+      socket.emit('set-ready', id, user.username, areAllReady); 
       setReady(true);
     }
   }
@@ -66,11 +70,13 @@ export default function PvpWaitingView() {
 
   useEffect(() => {
     socket.on('player-joined', (player: Player) => {
+      setReady(false);
       addPLayer(player);
     })
 
     socket.on('player-disconnected', ({username}) => {
       toast.error(`${username} se ha desconectado`);
+      setReady(false);
       removePlayer(username);
     })
 
@@ -81,8 +87,12 @@ export default function PvpWaitingView() {
 
     socket.on('player-waiting', ({username}) => {
       console.log('player-w', username)
-
       setReadyOrWaitingPlayer(username);
+    })
+
+    socket.on('all-players-ready', (data) => {
+      console.log('all-players-ready', data)
+      toast.success('Todos los jugadores están listos, comenzando el juego...');
     })
 
     return () => {
@@ -90,6 +100,7 @@ export default function PvpWaitingView() {
       socket.off('player-disconnected');
       socket.off('player-ready');
       socket.off('player-waiting');
+      socket.off('all-players-ready');
     }
   }, [socket]);
 

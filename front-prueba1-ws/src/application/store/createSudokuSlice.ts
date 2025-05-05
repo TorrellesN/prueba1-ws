@@ -24,7 +24,8 @@ export type SudokuStateType = {
   setFinishedState: () => void,
   addPLayer: (player: Player) => void,
   removePlayer: (username: string) => void,
-  setReadyOrWaitingPlayer: (username: string) => void
+  setReadyOrWaitingPlayer: (username: string) => void,
+  areAllPlayersReady: () => boolean
 }
 
 
@@ -133,6 +134,7 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
     const { players } = get();
     player.ready = false;
     const newPlayers = [...players, player];
+    newPlayers.forEach((p) => {p.ready = false});
     set({ players: newPlayers })
   },
 
@@ -140,19 +142,28 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
   removePlayer: (username: string) => {
     const { players } = get();
     const newPlayers = players.filter((p) => p.username !== username);
+    newPlayers.forEach((p) => {p.ready = false});
     set({ players: newPlayers })
   },
+
 
   setReadyOrWaitingPlayer: (username: string) => {
     const { players } = get();
     const newPlayers = players.map((p) => {
       if (p.username === username) {
-        return { ...p, ready: true };
+        return { ...p, ready: !p.ready };
       }
       return p;
     });
     set({ players: newPlayers });
     console.log('newPlayers', newPlayers)
+  },
+
+
+  areAllPlayersReady: () => {
+    const { players } = get();
+    const allReady = players.every((player) => player.ready);
+    return allReady;
   },
 
 
