@@ -15,6 +15,7 @@ import { useAppStore } from "./application/store/useAppStore";
 import PvpCreateSudokuView from "./ui/views/pvpCreateSudokuView/PvpCreateSudokuView";
 import PvpWaitingView from "./ui/views/pvpWaitingView/PvpWaitingView";
 import { initTheme } from "./ui/components/themeUtils";
+import PvpSudokuView from "./ui/views/pvpSudokuView/PvpSudokuView";
 
 export default function RouterApp() {
 
@@ -49,6 +50,7 @@ export default function RouterApp() {
                             <Route path="/pve/win" element={<PveGameWinView />} />
                             <Route path="/pvp/create" element={<PvpCreateSudokuView />} />
                             <Route path="/pvp/waiting" element={<PvpWaitingView />} />
+                            <Route path="/pvp/sudoku" element={<PvpSudokuView />} />
                             
                         </Route>
 

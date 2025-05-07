@@ -1,5 +1,6 @@
 import { StateCreator } from "zustand";
 import { Difficulty, PlayerSudokuBoard, SudokuBoardSolved, SudokuStatus, Player, initialPVESudoku, SudokuPVE, SudokuPVP, CellToInsert, pointsPerCell, RolNumber, initialPVPSudoku } from "../../domain/";
+import { all } from "axios";
 
 export type SudokuStateType = {
   id?: string,
@@ -162,13 +163,16 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
 
   areAllPlayersReady: () => {
     const { players } = get();
-    const allReady = players.every((player) => player.ready);
+    console.log(players)
+    let allReady = false;
+    if (players.length > 0) {
+      allReady = players.every((player) => player.ready);
+    }
     return allReady;
   },
 
 
   
-
 
   calculatePoints: () => {
     const { comboAcc, points } = get();

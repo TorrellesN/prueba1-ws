@@ -1,12 +1,14 @@
 import { useContext, useEffect, useState } from "react";
 import { SocketContext } from "../../../application/context/socketContext";
-import { Player, RolNumber, SocketCResponse } from "../../../domain";
+import { diffOptions, Player, RolNumber, SocketCResponse } from "../../../domain";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useAppStore } from "../../../application/store/useAppStore";
 import { useQuitGameModal } from "../../components/sharedComponents/quitGameModal/useQuitGameModal";
 import QuitGameModal from "../../components/sharedComponents/quitGameModal/QuitGameModal";
-import { cp } from "fs";
+import { getRolTextStyle, getRolColorCard } from "../../styles/sudokuCardStyles";
+
+
 
 export default function PvpWaitingView() {
 
@@ -27,23 +29,6 @@ export default function PvpWaitingView() {
   const [ready, setReady] = useState(false);
 
 
-  
-
-  const getRolColorCardStyle = (rol: RolNumber) => {
-    if (rol === 1) {
-      return 'rol-1-card-colors';
-    }
-    if (rol === 2) {
-      return 'rol-2-card-colors';
-    }
-    if (rol === 3) {
-      return 'rol-3-card-colors';
-    }
-    if (rol === 4) {
-      return 'rol-4-card-colors';
-    }
-  }
-
 
   const handleQuit = () => {
     socket.emit('quit-pvp-waiting', id, (response: SocketCResponse) =>{
@@ -52,7 +37,6 @@ export default function PvpWaitingView() {
       navigate('/')
     })
   }
-
 
   const handleSetReady = () => {
     if (ready) {
@@ -66,7 +50,6 @@ export default function PvpWaitingView() {
       setReady(true);
     }
   }
-
 
   useEffect(() => {
     socket.on('player-joined', (player: Player) => {
@@ -92,7 +75,7 @@ export default function PvpWaitingView() {
 
     socket.on('all-players-ready', (data) => {
       console.log('all-players-ready', data)
-      toast.success('Todos los jugadores están listos, comenzando el juego...');
+      navigate('/pvp/sudoku');
     })
 
     return () => {
@@ -110,7 +93,9 @@ export default function PvpWaitingView() {
       toast.error('Parece que tu conexión es inestable, vuelve a intentarlo más tarde');
       navigate('/pvp/create');
     }
-  }, [online])
+  }, [online]);
+
+
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen p-4">
@@ -118,7 +103,7 @@ export default function PvpWaitingView() {
         {/* Title div */}
         <div className="text-center">
           <h3 className="text-3xl font-bold">Sudoku PVP</h3>
-          <h3 className="text-xl font-bold">Dificultad </h3>
+          <h3 className="text-xl font-bold">Dificultad {diffOptions[difficulty]}</h3>
           <h3 className="text-lg font-bold">'animacion'Esperando Oponentes...</h3>
           <p className="text-gray-600 mt-2">Espera a que otros jugadores se unan a la partida</p>
         </div>
@@ -126,24 +111,34 @@ export default function PvpWaitingView() {
         {/* Grid 2x2 div */}
         <div className="grid grid-cols-2 gap-4 w-full">
 
-          <div className={`p-6 rounded-lg shadow-md flex items-center justify-center  ${getRolColorCardStyle(rol || 1)}`}>
+          <div 
+            className="p-6 rounded-lg shadow-md flex items-center justify-center"
+            style={getRolColorCard(rol || 1)}
+          >
             <div className="flex flex-col items-center gap-2">
               <div className="px-4 py-1 bg-red-400">.</div>
-              <h4 className="text-md font-semibold">{user.username}</h4>
+              <h4 className="text-md font-semibold" style={getRolTextStyle(rol || 1)}>
+                {user.username}
+              </h4>
               <p>{ready ? 'Listo!' : 'Esperando...' }</p>
             </div>
           </div>
 
           {players && players.map((player, index) => (
-            <div key={index} className={`p-6 rounded-lg shadow-md flex items-center justify-center ${getRolColorCardStyle(player.rol)}`}>
+            <div 
+              key={index} 
+              className="p-6 rounded-lg shadow-md flex items-center justify-center"
+              style={{...getRolColorCard(player.rol), ...getRolTextStyle(player.rol)}}
+            >
               <div className="flex flex-col items-center gap-2">
                 <div className="px-4 py-1 bg-red-400">.</div>
-                <h4 className="text-md font-semibold">{player.username}</h4>
+                <h4 className="text-md font-semibold">
+                  {player.username}
+                </h4>
                 <p>{player.ready ? 'Listo!' : 'Esperando...' }</p>
               </div>
             </div>
           ))}
-
 
         </div>
 
@@ -164,5 +159,5 @@ export default function PvpWaitingView() {
         </div>
       </div>
     </div>
-  )
+  );
 }

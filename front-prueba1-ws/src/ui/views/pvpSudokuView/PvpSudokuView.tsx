@@ -2,14 +2,14 @@ import { useContext, useEffect, useState } from 'react'
 import { SocketContext } from '../../../application/context/socketContext'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppStore } from '../../../application/store/useAppStore';
-import PveSudokuBoard from './PveSudokuBoard';
-import SudokuInput from './SudokuInput';
 import { toast } from 'react-toastify';
-import { SocketCResponse } from '../../../domain';
+import { diffOptions, SocketCResponse } from '../../../domain';
 import QuitGameModal from '../../components/sharedComponents/quitGameModal/QuitGameModal';
 import { useQuitGameModal } from '../../components/sharedComponents/quitGameModal/useQuitGameModal';
+import Countdown from './components/Countdown';
+import { getRolColorCard, getRolTextStyle } from '../../styles/sudokuCardStyles';
 
-export default function PveSudokuView() {
+export default function PvpSudokuView() {
 
   const token = useAppStore((state) => state.token);
   const user = useAppStore((state) => state.user);
@@ -23,6 +23,7 @@ export default function PveSudokuView() {
   const fillEmptyCells = useAppStore((state) => state.fillEmptyCells);
   const restartSudokuState = useAppStore((state) => state.restartSudokuState);
   const setFinishedState = useAppStore((state) => state.setFinishedState);
+  const players = useAppStore((state) => state.players);
 
   const navigate = useNavigate();
   const { socket, online } = useContext(SocketContext);
@@ -30,29 +31,29 @@ export default function PveSudokuView() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchParams] = useSearchParams();
   const finishnow = searchParams.get('finishnow');
-  const rol = useAppStore(state => state.rol);
   const {open, close, isOpenModal} = useQuitGameModal();
+  const id = useAppStore(state => state.id);
+  const difficulty = useAppStore(state => state.difficulty);
 
-  const handleFinishNow = () => {
+/*   const handleFinishNow = () => {
     if (finishnow && finishnow === 'true') {
       socket.emit('finish-now', (response: SocketCResponse) => {
         console.log('response', response);
         if (response.success) {
           fillEmptyCells();
-          /* dfgdfgdfgfg */
         } else {
           console.error('No se ha podido completar');
         }
       });
     };
-  }
+  } */
 
 
-  useEffect(() => {
+/*   useEffect(() => {
     setIsLoading(true);
     // Intentar recuperar los datos de la partida desde localStorage o la BD
-    const sudokuId = localStorage.getItem('sudokuRoomPve');
-    if (sudokuId && online && !rol) {
+    const sudokuId = localStorage.getItem('sudokuRoomPvp');
+    if (sudokuId && online) {
       // Recuperar datos de la partida
       socket.emit('reconnect-to-pve-game', sudokuId, (response: SocketCResponse) => {
         if (response.success) {
@@ -70,7 +71,7 @@ export default function PveSudokuView() {
       navigate('/pve/create');
     }
 
-  }, [online]);
+  }, [online]); */
 
 
 
@@ -87,7 +88,7 @@ export default function PveSudokuView() {
   };
 
 
-  const handleInputNumber = (number: number) => {
+/*   const handleInputNumber = (number: number) => {
     console.log(`Número ingresado: ${number} `, selectedCell);
     if (selectedCell) {
       const { row, col } = selectedCell;
@@ -116,10 +117,10 @@ export default function PveSudokuView() {
 
     }
 
-  }
+  } */
 
 
-  useEffect(() => {
+/*   useEffect(() => {
     socket.on('sudoku-finished', (data)=>{
       setFinishedState();
       navigate('/pve/win')
@@ -127,57 +128,70 @@ export default function PveSudokuView() {
     return (() => {
       socket.off('sudoku-finished')
     })
-  }, []);
+  }, []); */
 
 
-  const handleQuit = () => {
+/*   const handleQuit = () => {
     socket.emit('quit-pve-game')
     restartSudokuState();
     navigate('/')
-  }
+  } */
 
 
   //TODO: tal vez en el futuro deba borrarse esto debido a que ws es inestable y se puede desconectar.
   //actualmente se ejecutan estos cambios en un useEffect para evitar errores de render
   if (!online && !isLoading) {
     toast.error('Hubo un error de conexión, inténtalo de nuevo en unos minutos.');
-    return (<Navigate to="/pve/create" replace />);
+    toast.error('REVISA SESTO');
+    return (<Navigate to="/pvp/create" replace />);
   }
-  if (isLoading) {
-    return <div>Cargando partida...</div>;
+  if (isLoading && id) {
+    return <Countdown sudokuId={id} setIsLoading={setIsLoading} />;
   }
   if (!token) return (<p className="text-2xl font-light text-gray-500 mt-5">
     Necesitas autenticarte para poder jugar. <Link to={'/auth/login'}>Iniciar sesión</Link>
   </p>)
 
+
   return (
     <div>
-      <h1 className="text-5xl font-black">Sudoku un jugador</h1>
+      <h1 className="text-5xl font-black">Sudoku multijugador</h1>
       <p className="text-2xl font-light text-gray-500 mt-5">
-        Sudoku de {user.username}
+        Nivel <span className="font-bold">{diffOptions[difficulty]}</span>
       </p>
 
       <div className="flex flex-col items-center gap-4 mt-8 sm:grid sm:grid-cols-7 sm:items-start sm:justify-center">
+      <div className="grid grid-cols-2 gap-4 w-full">
         {/* Contenedor de la derecha (arriba en móvil) */}
         <div className="w-full bg-gray-100 p-4 rounded-xl sm:col-span-2">
-          {/* Aquí va el componente de la derecha */}
+        {players && players.map((player, index) => (
+            <div key={index} className='p-6 rounded-lg shadow-md flex items-center justify-center' 
+            style={{...getRolColorCard(player.rol), ...getRolTextStyle(player.rol)}}>
+              <div className="flex flex-col items-center gap-2">
+                <div className="px-4 py-1 bg-red-400">.</div>
+                <h4 className="text-md font-semibold" >{player.username}</h4>
+                <p>{player.ready ? 'Listo!' : 'Esperando...' }</p>
+              </div>
+            </div>
+          ))}
+        </div>
         </div>
 
         {/* Sudoku en el centro */}
-        <div className="w-full sm:col-span-3">
+        {/* <div className="w-full sm:col-span-3">
           <PveSudokuBoard onCellClick={handleCellClick} />
-        </div>
+        </div> */}
 
         {/* Contenedor de la izquierda (abajo en móvil) */}
-        <div className=" w-full bg-gray-100 p-4 rounded-xl sm:col-span-2">
+        {/* <div className=" w-full bg-gray-100 p-4 rounded-xl sm:col-span-2">
           <SudokuInput handleInputNumber={handleInputNumber} points={points} comboAcc={comboAcc} selectedCell={selectedCell} />
-        </div>
+        </div> */}
       </div>
       <div>
         <button onClick={open}>
           Abandonar
         </button>
-        <QuitGameModal isOpenModal={isOpenModal} close={close} handleQuit={handleQuit} />
+        <QuitGameModal isOpenModal={isOpenModal} close={close} handleQuit={() => {}} />
         
       </div>
     </div>

@@ -101,7 +101,7 @@ export default function registerPvpEvents(
         console.log('user-ready: ', sudokuId, username);
         socket.to(sudokuId).emit('player-ready', { username: username });
         if (areAllReady) {
-            io.to(sudokuId).emit('all-players-ready', {data: ''});
+            io.to(sudokuId).emit('all-players-ready', {data: sudokuId});
         }
     });
 
