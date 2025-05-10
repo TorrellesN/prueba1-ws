@@ -1,29 +1,34 @@
-import { useContext, useEffect, useState } from 'react'
-import { SocketContext } from '../../../application/context/socketContext'
+import { useContext, useEffect, useState } from 'react';
+import { SocketContext } from '../../../application/context/socketContext';
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppStore } from '../../../application/store/useAppStore';
 import { toast } from 'react-toastify';
-import { diffOptions, SocketCResponse } from '../../../domain';
+import { diffOptions, Player, RolNumber, SocketCResponse, UserLoginDataWRememberSchema } from '../../../domain';
 import QuitGameModal from '../../components/sharedComponents/quitGameModal/QuitGameModal';
 import { useQuitGameModal } from '../../components/sharedComponents/quitGameModal/useQuitGameModal';
 import Countdown from './components/Countdown';
-import { getRolColorCard, getRolTextStyle } from '../../styles/sudokuCardStyles';
+import { getRolTextBgStyle } from '../../styles/sudokuCardStyles';
+import PvpSudokuBoard from './components/PvpSudokuBoard';
+import SudokuInput from '../../components/sudokuCommonComponents/SudokuInput';
 
 export default function PvpSudokuView() {
 
   const token = useAppStore((state) => state.token);
-  const user = useAppStore((state) => state.user);
+  const rol = useAppStore((state) => state.rol);
   const points = useAppStore((state) => state.points);
   const comboAcc = useAppStore((state) => state.comboAcc);
   const isCorrectNumber = useAppStore((state) => state.isCorrectNumber);
   const calculatePoints = useAppStore((state) => state.calculatePoints);
-  const savePVEMove = useAppStore((state) => state.savePVEMove);
+  const savePVPSelfMove = useAppStore((state) => state.savePVPSelfMove);
+  const savePVPPlayerMove = useAppStore((state) => state.savePVPPlayerMove);
   const resetCombo = useAppStore((state) => state.resetCombo);
   const setStartedSudokuState = useAppStore((state) => state.setStartedSudokuState);
   const fillEmptyCells = useAppStore((state) => state.fillEmptyCells);
   const restartSudokuState = useAppStore((state) => state.restartSudokuState);
   const setFinishedState = useAppStore((state) => state.setFinishedState);
   const players = useAppStore((state) => state.players);
+  const difficulty = useAppStore(state => state.difficulty);
+
 
   const navigate = useNavigate();
   const { socket, online } = useContext(SocketContext);
@@ -33,7 +38,6 @@ export default function PvpSudokuView() {
   const finishnow = searchParams.get('finishnow');
   const {open, close, isOpenModal} = useQuitGameModal();
   const id = useAppStore(state => state.id);
-  const difficulty = useAppStore(state => state.difficulty);
 
 /*   const handleFinishNow = () => {
     if (finishnow && finishnow === 'true') {
@@ -88,17 +92,17 @@ export default function PvpSudokuView() {
   };
 
 
-/*   const handleInputNumber = (number: number) => {
+  const handleInputNumber = (number: number) => {
     console.log(`Número ingresado: ${number} `, selectedCell);
     if (selectedCell) {
       const { row, col } = selectedCell;
       if (isCorrectNumber(number, row, col)) {
 
         const pointsForSaving = calculatePoints();
-        socket.emit('save-pve-move', { row, col, value: number }, pointsForSaving, (response: SocketCResponse) => {
+        socket.emit('save-pvp-move', { row, col, value: number, rol: rol }, pointsForSaving, difficulty, (response: SocketCResponse) => {
           if (response.success) {
             console.log('Movimiento guardado');
-            savePVEMove({ row, col, value: number }, pointsForSaving);
+            savePVPSelfMove({ row, col, value: number }, pointsForSaving);
           } else {
             console.error(response.payload);
             toast.error(response.payload);
@@ -117,18 +121,27 @@ export default function PvpSudokuView() {
 
     }
 
-  } */
+  }
 
 
-/*   useEffect(() => {
-    socket.on('sudoku-finished', (data)=>{
+  useEffect(() => {
+/*     socket.on('sudoku-finished', (data)=>{
       setFinishedState();
       navigate('/pve/win')
-    })
+    }) */
+
+      socket.on('player-pvp-move', (data: {cellToInsert: {row: number, col: number, value: number, rol: RolNumber}, player: Player}) => {
+        console.log('player-pvp-move', data);
+        const {cellToInsert, player} = data;
+        if (rol !== player.rol) {
+          savePVPPlayerMove(cellToInsert, player);
+        }
+      })
     return (() => {
-      socket.off('sudoku-finished')
+      socket.off('sudoku-finished');
+      socket.off('player-pvp-move');
     })
-  }, []); */
+  }, []);
 
 
 /*   const handleQuit = () => {
@@ -162,15 +175,16 @@ export default function PvpSudokuView() {
 
       <div className="flex flex-col items-center gap-4 mt-8 sm:grid sm:grid-cols-7 sm:items-start sm:justify-center">
       <div className="grid grid-cols-2 gap-4 w-full">
+        
         {/* Contenedor de la derecha (arriba en móvil) */}
         <div className="w-full bg-gray-100 p-4 rounded-xl sm:col-span-2">
         {players && players.map((player, index) => (
             <div key={index} className='p-6 rounded-lg shadow-md flex items-center justify-center' 
-            style={{...getRolColorCard(player.rol), ...getRolTextStyle(player.rol)}}>
+            style={{...getRolTextBgStyle(player.rol)}}>
               <div className="flex flex-col items-center gap-2">
                 <div className="px-4 py-1 bg-red-400">.</div>
                 <h4 className="text-md font-semibold" >{player.username}</h4>
-                <p>{player.ready ? 'Listo!' : 'Esperando...' }</p>
+                <p>{player.points}</p>
               </div>
             </div>
           ))}
@@ -178,14 +192,14 @@ export default function PvpSudokuView() {
         </div>
 
         {/* Sudoku en el centro */}
-        {/* <div className="w-full sm:col-span-3">
-          <PveSudokuBoard onCellClick={handleCellClick} />
-        </div> */}
+        <div className="w-full sm:col-span-3">
+          <PvpSudokuBoard onCellClick={handleCellClick} />
+        </div>
 
         {/* Contenedor de la izquierda (abajo en móvil) */}
-        {/* <div className=" w-full bg-gray-100 p-4 rounded-xl sm:col-span-2">
+        <div className=" w-full bg-gray-100 p-4 rounded-xl sm:col-span-2">
           <SudokuInput handleInputNumber={handleInputNumber} points={points} comboAcc={comboAcc} selectedCell={selectedCell} />
-        </div> */}
+        </div>
       </div>
       <div>
         <button onClick={open}>

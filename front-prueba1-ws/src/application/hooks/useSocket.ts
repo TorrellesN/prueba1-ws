@@ -19,6 +19,36 @@ export const useSocket = (serverPath: string, allowedRoutes: string[]) => {
         }
     }));
 
+    useEffect(() => {
+        // Configuración inicial del socket
+        if (!socket.current) {
+            socket.current = io(serverPath, {
+            transports: ['websocket'],
+            autoConnect: false,
+            query: { authToken: token }
+          });
+        } else {
+          // Cuando el token cambia:
+          // 1. Desconecta el socket existente
+          if (socket.current.connected) {
+            socket.current.disconnect();
+          }
+          
+          // 2. Actualiza el query parameter
+          socket.current.io.opts.query = { authToken: token };
+          
+          // 3. Vuelve a conectar (si estaba conectado previamente)
+          socket        }
+    
+          //!Esto es posible que de desconexiones en el futuro, comprobar
+        return () => {
+          // Limpieza al desmontar el componente
+          if (socket.current) {
+            socket.current.disconnect();
+          }
+        };
+      }, [token]); // Este efecto se ejecuta cuando el token cambia
+
 
 
     const connectSocket = useCallback(() => {

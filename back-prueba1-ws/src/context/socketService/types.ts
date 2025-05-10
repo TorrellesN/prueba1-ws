@@ -6,3 +6,7 @@ export type SudokuAndPlayer = {
     sudoku: SudokuPVP,
     player: Player
 }
+export type SavedMoveUseCasesResponse = {
+    message: string;
+    player: Player;
+}

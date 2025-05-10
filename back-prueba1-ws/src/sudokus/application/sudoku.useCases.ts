@@ -1,9 +1,8 @@
 import { UserAuth } from "../../users/domain/User";
 import { buildPveBoard, buildPvpBoard, CellToInsert, Difficulty, SudokuPVE, SudokuPVP } from "../domain/Sudoku";
-import { createSudokuGame, SudokuResult } from "../domain/sudokuGenerator";
 import SudokuRepository from '../domain/sudoku.repository';
-import { RolNumber } from "../../users/domain/Player";
-import { SudokuAndPlayer } from "../../context/socketService/types";
+import { Player } from "../../users/domain/Player";
+import { SavedMoveUseCasesResponse, SudokuAndPlayer } from "../../context/socketService/types";
 
 export default class SudokuUseCases {
     constructor(private readonly sudokuRepository: SudokuRepository) { };
@@ -63,5 +62,18 @@ export default class SudokuUseCases {
     async quitUserFromSudokuPvp(email: string, sudokuId: string, difficulty: Difficulty): Promise<boolean> {
         return await this.sudokuRepository.quitUserFromSudokuPvp(email, sudokuId, difficulty);
     }
+
+    async startGamePvp(sudokuId: string, difficulty: Difficulty): Promise<boolean> {
+        return await this.sudokuRepository.startGamePvp(sudokuId, difficulty);
+    }
+
+    
+    async insertSudokuMovePvp(sudokuId: string,  difficulty: Difficulty, cellToInsert: CellToInsert, pointsForSaving: number): Promise<SavedMoveUseCasesResponse> {
+        const sudoku: SudokuPVP = await this.sudokuRepository.insertSudokuMovePvp(sudokuId, difficulty, cellToInsert, pointsForSaving);
+        const player: Player = sudoku.players.find((player: Player) => player.rol === cellToInsert.rol) as Player;
+        
+        if (sudoku.emptyCellsCount === 0) return {message: "partida terminada", player};
+        return {message : "movimiento guardado", player};
+    };
 
 }

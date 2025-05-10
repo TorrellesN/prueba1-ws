@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useAppStore } from "../../../application/store/useAppStore";
 import { useQuitGameModal } from "../../components/sharedComponents/quitGameModal/useQuitGameModal";
 import QuitGameModal from "../../components/sharedComponents/quitGameModal/QuitGameModal";
-import { getRolTextStyle, getRolColorCard } from "../../styles/sudokuCardStyles";
+import { getRolTextBgStyle } from "../../styles/sudokuCardStyles";
 
 
 
@@ -46,7 +46,7 @@ export default function PvpWaitingView() {
     if (!ready) {
       const areAllReady = areAllPlayersReady();
 
-      socket.emit('set-ready', id, user.username, areAllReady); 
+      socket.emit('set-ready', user.username, areAllReady); 
       setReady(true);
     }
   }
@@ -113,11 +113,11 @@ export default function PvpWaitingView() {
 
           <div 
             className="p-6 rounded-lg shadow-md flex items-center justify-center"
-            style={getRolColorCard(rol || 1)}
+            style={getRolTextBgStyle(rol || 1)}
           >
             <div className="flex flex-col items-center gap-2">
               <div className="px-4 py-1 bg-red-400">.</div>
-              <h4 className="text-md font-semibold" style={getRolTextStyle(rol || 1)}>
+              <h4 className="text-md font-semibold">
                 {user.username}
               </h4>
               <p>{ready ? 'Listo!' : 'Esperando...' }</p>
@@ -128,7 +128,7 @@ export default function PvpWaitingView() {
             <div 
               key={index} 
               className="p-6 rounded-lg shadow-md flex items-center justify-center"
-              style={{...getRolColorCard(player.rol), ...getRolTextStyle(player.rol)}}
+            style={getRolTextBgStyle(player.rol) }
             >
               <div className="flex flex-col items-center gap-2">
                 <div className="px-4 py-1 bg-red-400">.</div>

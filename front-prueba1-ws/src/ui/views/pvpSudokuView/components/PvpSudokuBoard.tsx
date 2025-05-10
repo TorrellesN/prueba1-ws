@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { PlayerCell } from '../../../domain';
-import { useAppStore } from '../../../application/store/useAppStore';
+import { useAppStore } from '../../../../application/store/useAppStore';
+import { PlayerCell } from '../../../../domain';
+import { getRolTextBgStyle } from '../../../styles/sudokuCardStyles';
 
 
 
@@ -9,13 +10,13 @@ interface SudokuBoardProps {
   onCellClick: (row: number, col: number, free: boolean) => void
 }
 
+
 export default function PvpSudokuBoard({ onCellClick }: SudokuBoardProps) {
   const [selectedCell, setSelectedCell] = useState<{ row: number; col: number } | null>(null);
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const currentSudoku = useAppStore(state => state.current);
 
   const handleCellClick = (row: number, col: number, cell: PlayerCell) => {
-    // Si la celda tiene rol 0, no se puede seleccionar pero sí destacar el número
     if (cell) {
       setSelectedNumber(cell.value);
       onCellClick(row, col, false);
@@ -106,7 +107,7 @@ export default function PvpSudokuBoard({ onCellClick }: SudokuBoardProps) {
       classes += 'bg-blue-100 font-bold';
     } else if (cell && cell.rol === 0) {
       // del rol 0
-      classes += 'bg-gray-200 font-bold ';
+      classes += 'bg-gray-200 font-bold';
     }
     
     
@@ -150,6 +151,7 @@ export default function PvpSudokuBoard({ onCellClick }: SudokuBoardProps) {
             {row.map((cell, colIndex) => (
               <div
                 key={`cell-${rowIndex}-${colIndex}`}
+                style={{...getRolTextBgStyle(cell?.rol)}}
                 className={getCellClasses(rowIndex, colIndex, cell)}
                 onClick={() => handleCellClick(rowIndex, colIndex, cell)}
                 data-row={rowIndex}

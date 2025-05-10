@@ -3,7 +3,7 @@ import { SocketContext } from '../../../application/context/socketContext'
 import { Link, Navigate, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAppStore } from '../../../application/store/useAppStore';
 import PveSudokuBoard from './PveSudokuBoard';
-import SudokuInput from './SudokuInput';
+import SudokuInput from '../../components/sudokuCommonComponents/SudokuInput';
 import { toast } from 'react-toastify';
 import { SocketCResponse } from '../../../domain';
 import QuitGameModal from '../../components/sharedComponents/quitGameModal/QuitGameModal';
@@ -65,9 +65,13 @@ export default function PveSudokuView() {
           navigate('/pve/create');
         }
       });
+    
     } else if (!sudokuId) {
       // Si no hay roomId en ls, redirigir a la página de creación de Sudoku
       navigate('/pve/create');
+    
+    } else if (sudokuId && rol) {
+      setIsLoading(false);
     }
 
   }, [online]);

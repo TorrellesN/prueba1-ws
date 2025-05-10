@@ -101,9 +101,6 @@ export function RegisterFormZod() {
     }
 
 
-    console.log('cual se ejecuta antes')
-    console.log(authError, 'error api')
-
     reset();
   };
 

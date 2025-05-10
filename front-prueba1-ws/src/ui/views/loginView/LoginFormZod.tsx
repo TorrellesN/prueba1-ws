@@ -140,9 +140,6 @@ export function LoginForm() {
       Perform any additional actions with the logged-in user data
     } */
 
-    console.log('cual se ejecuta antes')
-     console.log(authError, 'error api')
-
     reset();
   };
 

@@ -1,9 +1,8 @@
 import { Server, Socket } from "socket.io";
 import SudokuUseCases from "../../../sudokus/application/sudoku.useCases";
 import { UserAuth } from "../../../users/domain/User";
-import { Difficulty } from "../../../sudokus/domain/Sudoku";
-import { SocketCallback } from "../types";
-import { StringMap } from "ts-jest";
+import { CellToInsert, Difficulty } from "../../../sudokus/domain/Sudoku";
+import { SavedMoveUseCasesResponse, SocketCallback } from "../types";
 
 
 export default function registerPvpEvents(
@@ -19,6 +18,28 @@ export default function registerPvpEvents(
     socket.on('request-sudoku-pvp', async (difficulty: Difficulty, callback: SocketCallback) => {
         console.log('Solicitud de sudoku PVP recibida')
         let roomIds: string[] = [];
+
+        //si existe en otra sala se le quita 
+        if (currentRoom) {
+            try {
+                console.log(`User ${user.username} already in room ${currentRoom}, removing first`);
+                await sudokuUseCases.quitUserFromSudokuPvp(user.email, currentRoom, currentDifficulty!);
+                socket.leave(currentRoom);
+                io.to(currentRoom).emit('player-disconnected', { username: user.username });
+                currentRoom = null;
+                currentDifficulty = null;
+            } catch (error) {
+                console.log('Error al salir de la sala previa: ' + error);
+            }
+        }
+        //comprobación adicional para otras salas
+        const socketRooms = Array.from(socket.rooms).filter(room => room !== socket.id);
+        if (socketRooms.length > 0) {
+            console.log(`Leaving ${socketRooms.length} additional rooms`);
+            socketRooms.forEach(room => {
+                socket.leave(room);
+            });
+        }
 
         try {
             roomIds = await sudokuUseCases.findRoomsPvp(difficulty);
@@ -97,11 +118,24 @@ export default function registerPvpEvents(
     })
 
 
-    socket.on('set-ready', (sudokuId: string, username: string, areAllReady: boolean) => {
-        console.log('user-ready: ', sudokuId, username);
+    socket.on('set-ready', async (username: string, areAllReady: boolean) => {
+        let sudokuId = Array.from(socket.rooms).find((room) => room !== socket.id);
+
+        if (!sudokuId) {
+            sudokuId = currentRoom!;
+            socket.join(sudokuId);
+        }
+        
         socket.to(sudokuId).emit('player-ready', { username: username });
+        
         if (areAllReady) {
-            io.to(sudokuId).emit('all-players-ready', {data: sudokuId});
+            console.log(1)
+            try {
+                await sudokuUseCases.startGamePvp(sudokuId, currentDifficulty!);
+                io.to(sudokuId).emit('all-players-ready', {data: sudokuId});
+            } catch (error) {
+                console.log('Error al iniciar el juego: ' + error);
+            }
         }
     });
 
@@ -110,6 +144,58 @@ export default function registerPvpEvents(
         console.log('set-waiting', sudokuId, username);
         socket.to(sudokuId).emit('player-waiting', { username: username });
     });
+
+
+    socket.on('save-pvp-move', async (cellToInsert: CellToInsert, pointsForSaving: number, difficulty: Difficulty, callback: SocketCallback) => {
+        //TODO: cuando implemente ls, igual es mejor rescatar room de los params de los headers del socket
+        try {
+            const sudokuRoom = Array.from(socket.rooms).find((room) => room !== socket.id);
+
+            if (!sudokuRoom) {
+                throw new Error('401');
+            }
+            const { row, col, value, rol } = cellToInsert;
+
+            const bdSavedMove: SavedMoveUseCasesResponse = await sudokuUseCases.insertSudokuMovePvp(
+                sudokuRoom!, difficulty, { row, col, value, rol }, pointsForSaving
+            );
+
+            if (bdSavedMove.message === 'partida terminada') {
+                try {
+                    //TODO: en pvp añadimos logica para ganadores/perdedores. llama a postgre para actualizar
+                    await sudokuUseCases.finishGamePve(sudokuRoom);
+
+                    io.to(sudokuRoom).emit('sudoku-finished', { message: 'partida terminada' });
+                    if (typeof callback === 'function') callback({ success: true, payload: 'finished' });
+
+                } catch (error) {
+                    console.log(error)
+                    if (typeof callback === 'function') callback({ success: false, payload: 'Lo sentimos, estamos teniendo problemas en servidor.' });
+                }
+
+
+            }
+            if (bdSavedMove.message === 'movimiento guardado') {
+                if (typeof callback === 'function') {
+                    socket.to(sudokuRoom!).emit('player-pvp-move', { cellToInsert, player: bdSavedMove.player });
+                    callback({ success: true, payload: 'movimiento guardado' });
+                }
+            }
+
+        } catch (error) {
+            const e = error as Error;
+
+            if (typeof callback === 'function') {
+                if (e.message === '404') {
+                    callback({ success: false, payload: 'Parece que esa casilla ya está ocupada.' });
+                } else if (e.message === '401') {
+                    callback({ success: false, payload: 'No ha sido posible guardar tu movimiento, recarga la página.' });
+                }
+            }
+        }
+
+        //TODO: manejar error cuando no hay sudokuRoom, puedo desconectar el socket por ejemplo..
+    })
 
 
 

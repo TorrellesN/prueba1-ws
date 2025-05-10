@@ -25,13 +25,10 @@ export const RolColors: Record<number, {light: string, base: string, contrast: s
   };
   
     // Función para obtener el estilo del texto según el rol
-    export const getRolTextStyle = (rol: RolNumber): React.CSSProperties => {
+    export const getRolTextBgStyle = (rol: RolNumber | undefined): React.CSSProperties => {
+      if (!rol) return {};
       return {
-          color: `var(${RolColors[rol].contrast})`
-      };
-    };
-    export const getRolColorCard = (rol: RolNumber): React.CSSProperties => {
-      return {
-        backgroundColor: `var(${RolColors[rol].light})`
+          color: `var(${RolColors[rol].contrast})`,
+          backgroundColor: `var(${RolColors[rol].light})`
       };
     };

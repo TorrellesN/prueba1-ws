@@ -20,6 +20,8 @@ export type SudokuStateType = {
   calculatePoints: () => number,
   isCorrectNumber: (number: number, row: number, col: number) => boolean,
   savePVEMove: (cellToInsert: CellToInsert, calculatedPoints: number) => void,
+  savePVPSelfMove: (cellToInsert: CellToInsert, calculatedPoints: number) => void,
+  savePVPPlayerMove: (cellToInsert: CellToInsert, player: Player) => void,
   resetCombo: () => void,
   fillEmptyCells: () => void,
   setFinishedState: () => void,
@@ -163,10 +165,9 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
 
   areAllPlayersReady: () => {
     const { players } = get();
-    console.log(players)
     let allReady = false;
-    if (players.length > 0) {
-      allReady = players.every((player) => player.ready);
+    if (players.length >= 1) {
+      allReady = players.every((player) => player.ready === true);
     }
     return allReady;
   },
@@ -182,6 +183,7 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
     return points + pointsPerCell + (comboAcc * 2);
   },
 
+
   isCorrectNumber: (number: number, row: number, col: number) => {
 
     if (number === get().solved[row][col]) {
@@ -191,9 +193,11 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
     }
   },
 
+
   resetCombo: () => {
     set({ comboAcc: 0 })
   },
+
 
   savePVEMove: (cellToInsert: CellToInsert, calculatedPoints: number) => {
     const { current } = get();
@@ -206,6 +210,42 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
       current: newCurrent,
       points: calculatedPoints,
       comboAcc: state.comboAcc >= 10 ? 10 : state.comboAcc + 1
+    }))
+
+  },
+
+
+  savePVPSelfMove: (cellToInsert: CellToInsert, calculatedPoints: number) => {
+    const { current, rol } = get();
+    const { row, col, value } = cellToInsert;
+    const newCurrent = [...current];
+    newCurrent[row][col] = { value, rol: rol || 1 };
+
+    set((state) => ({
+      ...state,
+      current: newCurrent,
+      points: calculatedPoints,
+      comboAcc: state.comboAcc >= 10 ? 10 : state.comboAcc + 1
+    }))
+
+  },
+
+
+  savePVPPlayerMove: (cellToInsert: CellToInsert, player: Player) => {
+    const { current, players } = get();
+    const { row, col, value } = cellToInsert;
+    const newCurrent = [...current];
+    newCurrent[row][col] = { value, rol: player.rol };
+    
+    const newPlayers = [...players];
+    const playerIndex = newPlayers.findIndex((p) => p.email === player.email);
+    newPlayers[playerIndex].comboAcc = player.comboAcc;
+    newPlayers[playerIndex].points = player.points;
+
+    set((state) => ({
+      ...state,
+      current: newCurrent,
+      players: newPlayers,
     }))
 
   },

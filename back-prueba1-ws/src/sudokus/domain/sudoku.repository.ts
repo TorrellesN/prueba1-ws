@@ -16,5 +16,7 @@ export default interface SudokuRepository {
     getSudokuByIdPvp(sudokuId: string, difficulty: Difficulty): Promise<SudokuPVP>,
     joinUserToSudokuPvp(user: UserAuth, sudokuId: string, difficulty: Difficulty): Promise<SudokuAndPlayer>,
     quitUserFromSudokuPvp(email: string, sudokuId: string, difficulty: Difficulty): Promise<boolean>,
+    startGamePvp(sudokuId: string, difficulty: Difficulty): Promise<boolean>,
+    insertSudokuMovePvp(sudokuId: string, difficulty: Difficulty, cellToInsert: CellToInsert, pointsForSaving: number): Promise<SudokuPVP>,
 
 }

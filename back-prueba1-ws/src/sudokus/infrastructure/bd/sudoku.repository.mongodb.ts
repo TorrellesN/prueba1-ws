@@ -192,6 +192,55 @@ export default class SudokuRepositoryMongoDB implements SudokuRepository {
     }
 
 
+    async startGamePvp(sudokuId: string, difficulty: Difficulty): Promise<boolean> {
+        const collection = this.getMongoPvpCollection(difficulty);
+        const realTime = new Date();
+        
+        const result = await collection.updateOne(
+            { _id: new ObjectId(sudokuId) },
+            {
+                $set: {
+                    status: 'started',
+                    createdAt: realTime
+                }
+            } as Object,
+        )
+        
+        if (result.matchedCount === 0 || result.modifiedCount === 0) return false;
+        return true;
+    };
+
+
+    async insertSudokuMovePvp(sudokuId: string, difficulty: Difficulty, cellToInsert: CellToInsert, pointsForSaving: number): Promise<SudokuPVP> {
+        const collection = this.getMongoPvpCollection(difficulty);
+
+        const result = await collection.findOneAndUpdate(
+            {
+                _id: new ObjectId(sudokuId),
+                [`solved.${cellToInsert.row}.${cellToInsert.col}`]: cellToInsert.value,
+                [`current.${cellToInsert.row}.${cellToInsert.col}`]: { $type: 'null' }
+            },
+            {
+                $set: {
+                    [`current.${cellToInsert.row}.${cellToInsert.col}`]: { rol: cellToInsert.rol, value: cellToInsert.value },
+                    [`players.$[elem].points`]: pointsForSaving
+                },
+                $inc: {
+                    [`players.$[elem].comboAcc`]: 1,
+                    emptyCellsCount: -1
+                }
+            } as Object,
+            { 
+                arrayFilters: [{ 'elem.rol': cellToInsert.rol }],
+                returnDocument: 'after' 
+            }
+        );
+
+        if ( !result ) throw new Error('404');
+        const { current, solved, emptyCellsCount, players } = result;
+        const sudokuPvp : SudokuPVP= { current, solved, difficulty, emptyCellsCount, players }; 
+        return sudokuPvp;
+    }
 }
 
 

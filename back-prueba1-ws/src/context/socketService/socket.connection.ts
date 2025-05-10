@@ -3,9 +3,9 @@ import SudokuUseCases from "../../sudokus/application/sudoku.useCases";
 import SudokuRepositoryMongoDB from "../../sudokus/infrastructure/bd/sudoku.repository.mongodb";
 import { UserAuth } from "../../users/domain/User";
 import { decryptJWT } from "../security/auth";
-import registerPveEvents from "./pveSocketService/socketPveEvents";
+import registerPveEvents from "./pveSocketService/socket.eventsPve";
 import { SocketCallback } from "./types";
-import registerPvpEvents from "./pvpSocketService/socketPvpEvents";
+import registerPvpEvents from "./pvpSocketService/socket.eventsPvp";
 
 const sudokuUseCases: SudokuUseCases = new SudokuUseCases(new SudokuRepositoryMongoDB());
 
@@ -13,6 +13,7 @@ export default function configureSocket(io: Server) {
     io.on('connection', (socket) => {
         console.log('Un usuario se ha conectado con id: ' + socket.id);
         const decryptedUser = decryptJWT(String(socket.handshake.query.authToken));
+        console.log('decryptedUser: ', decryptedUser);
         if (!decryptedUser || 'response' in decryptedUser) {
             return socket.disconnect();
             //TODO: ver si puedo hacer esta función con algún callback para que user tenga que iniciar sesión de nuevo

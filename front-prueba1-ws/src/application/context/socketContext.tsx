@@ -19,19 +19,14 @@ export const SocketProvider = ({children}: {children : React.ReactNode}) => {
         ['/pve', '/pvp']
     );
 
+    //aquí se pueden hacer escuchas también
     useEffect(() => {
         if (online) {
             console.log('conexion establecida')
-            /* socket.on( 'prueba-evento', (usuarios) => {
-               console.log('recibido')
-            }) */
         } else {
-            socket.off('lista-usuarios')
             console.log('desconectando')
         }
-
         return () => {
-            socket.off('lista-usuarios')
         }
 
     }, [ online ]);
