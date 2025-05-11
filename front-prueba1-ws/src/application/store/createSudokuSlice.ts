@@ -28,7 +28,8 @@ export type SudokuStateType = {
   addPLayer: (player: Player) => void,
   removePlayer: (username: string) => void,
   setReadyOrWaitingPlayer: (username: string) => void,
-  areAllPlayersReady: () => boolean
+  areAllPlayersReady: () => boolean,
+  resetOtherPlayersCombo: (email: string) => void
 }
 
 
@@ -196,6 +197,19 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
 
   resetCombo: () => {
     set({ comboAcc: 0 })
+  },
+
+  
+  resetOtherPlayersCombo: (email: string) => {
+    const { players } = get();
+    const newPlayers = players.map((p) => {
+      if (p.email === email) {
+        return { ...p, comboAcc: 0 };
+      }
+      return p;
+    });
+    console.log('newPlayers', newPlayers)
+    set({ players: newPlayers });
   },
 
 

@@ -97,8 +97,8 @@ export default function registerPveEvents(
         socket.on('quit-pve-game', async () => {
             try {
                 const sudokuId = Array.from(socket.rooms).find((room) => room !== socket.id);
-            const sdf = await sudokuUseCases.leaveGamePve(sudokuId!);
-            console.log(sdf)
+            await sudokuUseCases.leaveGamePve(sudokuId!);
+            socket.leave(sudokuId!);
             } catch (error) {
                 console.log(error)
             }

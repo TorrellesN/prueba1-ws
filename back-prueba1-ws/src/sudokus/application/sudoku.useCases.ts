@@ -59,8 +59,8 @@ export default class SudokuUseCases {
         return await this.sudokuRepository.joinUserToSudokuPvp(user, sudokuId, difficulty);
     }
 
-    async quitUserFromSudokuPvp(email: string, sudokuId: string, difficulty: Difficulty): Promise<boolean> {
-        return await this.sudokuRepository.quitUserFromSudokuPvp(email, sudokuId, difficulty);
+    async quitUserFromPvpAwait(email: string, sudokuId: string, difficulty: Difficulty): Promise<boolean> {
+        return await this.sudokuRepository.quitUserFromPvpAwait(email, sudokuId, difficulty);
     }
 
     async startGamePvp(sudokuId: string, difficulty: Difficulty): Promise<boolean> {
@@ -75,5 +75,15 @@ export default class SudokuUseCases {
         if (sudoku.emptyCellsCount === 0) return {message: "partida terminada", player};
         return {message : "movimiento guardado", player};
     };
+
+    async resetComboPvp(sudokuId: string, difficulty: Difficulty, email: string): Promise<boolean> {
+        return await this.sudokuRepository.resetComboPvp(sudokuId, difficulty, email);
+    }
+
+    async quitUserAndCheckVictory(email: string, sudokuId: string, difficulty: Difficulty): Promise<string> {
+        const sudoku = await this.sudokuRepository.quitUserPvpStarted(email, sudokuId, difficulty);
+        if (sudoku.players.length === 1)  return "partida terminada";
+        else return "jugador eliminado";
+    }
 
 }

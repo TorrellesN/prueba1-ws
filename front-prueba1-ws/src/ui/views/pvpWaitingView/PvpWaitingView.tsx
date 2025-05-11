@@ -57,24 +57,21 @@ export default function PvpWaitingView() {
       addPLayer(player);
     })
 
-    socket.on('player-disconnected', ({username}) => {
-      toast.error(`${username} se ha desconectado`);
+    socket.on('player-pvp-quit', ({username}) => {
+      /* toast.error(`${username} se ha desconectado`); */
       setReady(false);
       removePlayer(username);
     })
 
     socket.on('player-ready', ({username}) => {
-      console.log('player-ready', username)
       setReadyOrWaitingPlayer(username);
     })
 
     socket.on('player-waiting', ({username}) => {
-      console.log('player-w', username)
       setReadyOrWaitingPlayer(username);
     })
 
     socket.on('all-players-ready', (data) => {
-      console.log('all-players-ready', data)
       navigate('/pvp/sudoku');
     })
 

@@ -28,6 +28,8 @@ export default function PvpSudokuView() {
   const setFinishedState = useAppStore((state) => state.setFinishedState);
   const players = useAppStore((state) => state.players);
   const difficulty = useAppStore(state => state.difficulty);
+  const resetOtherPlayersCombo = useAppStore(state => state.resetOtherPlayersCombo);
+  const removePlayer = useAppStore(state => state.removePlayer);
 
 
   const navigate = useNavigate();
@@ -36,46 +38,46 @@ export default function PvpSudokuView() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchParams] = useSearchParams();
   const finishnow = searchParams.get('finishnow');
-  const {open, close, isOpenModal} = useQuitGameModal();
+  const { open, close, isOpenModal } = useQuitGameModal();
   const id = useAppStore(state => state.id);
 
-/*   const handleFinishNow = () => {
-    if (finishnow && finishnow === 'true') {
-      socket.emit('finish-now', (response: SocketCResponse) => {
-        console.log('response', response);
-        if (response.success) {
-          fillEmptyCells();
-        } else {
-          console.error('No se ha podido completar');
-        }
-      });
-    };
-  } */
+  /*   const handleFinishNow = () => {
+      if (finishnow && finishnow === 'true') {
+        socket.emit('finish-now', (response: SocketCResponse) => {
+          console.log('response', response);
+          if (response.success) {
+            fillEmptyCells();
+          } else {
+            console.error('No se ha podido completar');
+          }
+        });
+      };
+    } */
 
 
-/*   useEffect(() => {
-    setIsLoading(true);
-    // Intentar recuperar los datos de la partida desde localStorage o la BD
-    const sudokuId = localStorage.getItem('sudokuRoomPvp');
-    if (sudokuId && online) {
-      // Recuperar datos de la partida
-      socket.emit('reconnect-to-pve-game', sudokuId, (response: SocketCResponse) => {
-        if (response.success) {
-          setStartedSudokuState(response.payload);
-          handleFinishNow();
-          setIsLoading(false);
-          
-        } else {
-          console.error('Error al reconectar', response.payload);
-          navigate('/pve/create');
-        }
-      });
-    } else if (!sudokuId) {
-      // Si no hay roomId en ls, redirigir a la página de creación de Sudoku
-      navigate('/pve/create');
-    }
-
-  }, [online]); */
+  /*   useEffect(() => {
+      setIsLoading(true);
+      // Intentar recuperar los datos de la partida desde localStorage o la BD
+      const sudokuId = localStorage.getItem('sudokuRoomPvp');
+      if (sudokuId && online) {
+        // Recuperar datos de la partida
+        socket.emit('reconnect-to-pve-game', sudokuId, (response: SocketCResponse) => {
+          if (response.success) {
+            setStartedSudokuState(response.payload);
+            handleFinishNow();
+            setIsLoading(false);
+            
+          } else {
+            console.error('Error al reconectar', response.payload);
+            navigate('/pve/create');
+          }
+        });
+      } else if (!sudokuId) {
+        // Si no hay roomId en ls, redirigir a la página de creación de Sudoku
+        navigate('/pve/create');
+      }
+  
+    }, [online]); */
 
 
 
@@ -112,11 +114,13 @@ export default function PvpSudokuView() {
 
       } else {
         toast.error('Número incorrecto');
-        socket.emit('reset-pve-combo', (response: SocketCResponse) => {
-          if (response.success) {
-            resetCombo();
-          }
-        });
+        if (comboAcc > 0) {
+          socket.emit('reset-pvp-combo', difficulty, ( response: SocketCResponse) => {
+            if (response.success) {
+              resetCombo();
+            }
+          });
+        }
       }
 
     }
@@ -125,30 +129,41 @@ export default function PvpSudokuView() {
 
 
   useEffect(() => {
-/*     socket.on('sudoku-finished', (data)=>{
-      setFinishedState();
-      navigate('/pve/win')
-    }) */
+    /*     socket.on('sudoku-finished', (data)=>{
+          setFinishedState();
+          navigate('/pve/win')
+        }) */
 
-      socket.on('player-pvp-move', (data: {cellToInsert: {row: number, col: number, value: number, rol: RolNumber}, player: Player}) => {
-        console.log('player-pvp-move', data);
-        const {cellToInsert, player} = data;
-        if (rol !== player.rol) {
-          savePVPPlayerMove(cellToInsert, player);
-        }
-      })
+    socket.on('player-pvp-move', (data: { cellToInsert: { row: number, col: number, value: number, rol: RolNumber }, player: Player }) => {
+      console.log('player-pvp-move', data);
+      const { cellToInsert, player } = data;
+      if (rol !== player.rol) {
+        savePVPPlayerMove(cellToInsert, player);
+      }
+    })
+
+    socket.on('player-reset-combo', ({ email}) => {
+      resetOtherPlayersCombo(email);
+    });
+
+    socket.on('player-pvp-quit', ({username}) => {
+      toast.info(`${username} ha abandonado la partida`);
+            removePlayer(username);
+    })
+
     return (() => {
       socket.off('sudoku-finished');
       socket.off('player-pvp-move');
+      socket.off('player-reset-combo');
     })
   }, []);
 
 
-/*   const handleQuit = () => {
-    socket.emit('quit-pve-game')
-    restartSudokuState();
-    navigate('/')
-  } */
+    const handleQuit = () => {
+      socket.emit('quit-pvp-game', difficulty)
+      restartSudokuState();
+      navigate('/')
+    }
 
 
   //TODO: tal vez en el futuro deba borrarse esto debido a que ws es inestable y se puede desconectar.
@@ -174,21 +189,21 @@ export default function PvpSudokuView() {
       </p>
 
       <div className="flex flex-col items-center gap-4 mt-8 sm:grid sm:grid-cols-7 sm:items-start sm:justify-center">
-      <div className="grid grid-cols-2 gap-4 w-full">
-        
-        {/* Contenedor de la derecha (arriba en móvil) */}
-        <div className="w-full bg-gray-100 p-4 rounded-xl sm:col-span-2">
-        {players && players.map((player, index) => (
-            <div key={index} className='p-6 rounded-lg shadow-md flex items-center justify-center' 
-            style={{...getRolTextBgStyle(player.rol)}}>
-              <div className="flex flex-col items-center gap-2">
-                <div className="px-4 py-1 bg-red-400">.</div>
-                <h4 className="text-md font-semibold" >{player.username}</h4>
-                <p>{player.points}</p>
+        <div className="grid grid-cols-2 gap-4 w-full">
+
+          {/* Contenedor de la derecha (arriba en móvil) */}
+          <div className="w-full bg-gray-100 p-4 rounded-xl sm:col-span-2">
+            {players && players.map((player, index) => (
+              <div key={index} className='p-6 rounded-lg shadow-md flex items-center justify-center'
+                style={{ ...getRolTextBgStyle(player.rol) }}>
+                <div className="flex flex-col items-center gap-2">
+                  <div className="px-4 py-1 bg-red-400">.</div>
+                  <h4 className="text-md font-semibold" >{player.username}</h4>
+                  <p>{player.points}</p>
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
         </div>
 
         {/* Sudoku en el centro */}
@@ -205,8 +220,8 @@ export default function PvpSudokuView() {
         <button onClick={open}>
           Abandonar
         </button>
-        <QuitGameModal isOpenModal={isOpenModal} close={close} handleQuit={() => {}} />
-        
+        <QuitGameModal isOpenModal={isOpenModal} close={close} handleQuit={handleQuit} />
+
       </div>
     </div>
   )

@@ -15,8 +15,10 @@ export default interface SudokuRepository {
     insertSudokuPvp (newSudoku: SudokuPVP): Promise<string>,
     getSudokuByIdPvp(sudokuId: string, difficulty: Difficulty): Promise<SudokuPVP>,
     joinUserToSudokuPvp(user: UserAuth, sudokuId: string, difficulty: Difficulty): Promise<SudokuAndPlayer>,
-    quitUserFromSudokuPvp(email: string, sudokuId: string, difficulty: Difficulty): Promise<boolean>,
+    quitUserFromPvpAwait(email: string, sudokuId: string, difficulty: Difficulty): Promise<boolean>,
+    quitUserPvpStarted(email: string, sudokuId: string, difficulty: Difficulty): Promise<SudokuPVP>
     startGamePvp(sudokuId: string, difficulty: Difficulty): Promise<boolean>,
     insertSudokuMovePvp(sudokuId: string, difficulty: Difficulty, cellToInsert: CellToInsert, pointsForSaving: number): Promise<SudokuPVP>,
+    resetComboPvp (sudokuId: string, difficulty: Difficulty, email: string): Promise<boolean>,
 
 }

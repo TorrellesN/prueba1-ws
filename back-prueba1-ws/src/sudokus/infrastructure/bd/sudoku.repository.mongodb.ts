@@ -176,7 +176,7 @@ export default class SudokuRepositoryMongoDB implements SudokuRepository {
     }
 
 
-    async quitUserFromSudokuPvp(email: string, sudokuId: string, difficulty: Difficulty): Promise<boolean> {
+    async quitUserFromPvpAwait(email: string, sudokuId: string, difficulty: Difficulty): Promise<boolean> {
         const collection = this.getMongoPvpCollection(difficulty);
         const result = await collection.updateOne(
             { _id: new ObjectId(sudokuId) },
@@ -189,6 +189,24 @@ export default class SudokuRepositoryMongoDB implements SudokuRepository {
 
         if (result.matchedCount === 0 || result.modifiedCount === 0) return false;
         return true;
+    }
+
+
+        async quitUserPvpStarted(email: string, sudokuId: string, difficulty: Difficulty): Promise<SudokuPVP> {
+        const collection = this.getMongoPvpCollection(difficulty);
+        const result = await collection.findOneAndUpdate(
+            { _id: new ObjectId(sudokuId) },
+            {
+                $pull: {
+                   players: { email: email }
+                }
+            } as Object,
+            {returnDocument: 'after' }
+        );
+        if (!result) throw new Error('404');
+                const { current, solved, emptyCellsCount, players } = result;
+        const sudokuPvp : SudokuPVP= { current, solved, difficulty, emptyCellsCount, players }; 
+        return sudokuPvp;
     }
 
 
@@ -241,6 +259,27 @@ export default class SudokuRepositoryMongoDB implements SudokuRepository {
         const sudokuPvp : SudokuPVP= { current, solved, difficulty, emptyCellsCount, players }; 
         return sudokuPvp;
     }
+
+
+    async resetComboPvp(sudokuId: string, difficulty: Difficulty, email: string): Promise<boolean> {
+        const collection = this.getMongoPvpCollection(difficulty);
+        
+        const result = await collection.updateOne(
+            { _id: new ObjectId(sudokuId) },
+            {
+                $set: {
+                    [`players.$[elem].comboAcc`]: 0
+                }
+            } as Object,
+            { arrayFilters: [{ 'elem.email': email }] }
+        );
+
+        if (result.matchedCount === 0 || result.modifiedCount === 0) return false;
+        return true;
+    }
+
+
+
 }
 
 
