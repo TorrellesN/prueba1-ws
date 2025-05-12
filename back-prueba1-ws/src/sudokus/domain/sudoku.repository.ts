@@ -1,5 +1,5 @@
 import { SudokuPVE, CellToInsert, Difficulty, SudokuPVP } from "./Sudoku";
-import { UserAuth } from '../../users/domain/User';
+import User, { UserAuth } from '../../users/domain/User';
 import { RolNumber } from "../../users/domain/Player";
 import { SudokuAndPlayer } from "../../context/socketService/types";
 
@@ -10,6 +10,7 @@ export default interface SudokuRepository {
     finishGamePve (sudokuId: string): Promise<boolean>,
     leaveGamePve(sudokuId: string): Promise<boolean>,
     getSudokuByIdPve(sudokuId: string): Promise<SudokuPVE>,
+    /* getSudokuByIdPvp(sudokuId: string, difficulty: Difficulty, email: User['email']): Promise<SudokuPVP>, */
     finishNow(sudokuId: string): Promise<boolean>,
     findRoomsPvp(diff: Difficulty): Promise<string[]>,
     insertSudokuPvp (newSudoku: SudokuPVP): Promise<string>,

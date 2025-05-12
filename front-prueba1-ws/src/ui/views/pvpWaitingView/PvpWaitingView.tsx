@@ -52,6 +52,7 @@ export default function PvpWaitingView() {
   }
 
   useEffect(() => {
+    localStorage.removeItem('sudokuRoomPvp');
     socket.on('player-joined', (player: Player) => {
       setReady(false);
       addPLayer(player);

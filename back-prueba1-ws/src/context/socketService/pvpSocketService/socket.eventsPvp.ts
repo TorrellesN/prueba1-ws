@@ -3,7 +3,6 @@ import SudokuUseCases from "../../../sudokus/application/sudoku.useCases";
 import { UserAuth } from "../../../users/domain/User";
 import { CellToInsert, Difficulty } from "../../../sudokus/domain/Sudoku";
 import { SavedMoveUseCasesResponse, SocketCallback } from "../types";
-import { DifficultyCells } from "../../../sudokus/domain/sudokuGenerator";
 
 
 export default function registerPvpEvents(
@@ -34,13 +33,13 @@ export default function registerPvpEvents(
             }
         }
         //comprobación adicional para otras salas
-        const socketRooms = Array.from(socket.rooms).filter(room => room !== socket.id);
+        /* const socketRooms = Array.from(socket.rooms).filter(room => room !== socket.id);
         if (socketRooms.length > 0) {
             console.log(`Leaving ${socketRooms.length} additional rooms`);
             socketRooms.forEach(room => {
                 socket.leave(room);
             });
-        }
+        } */
 
         try {
             roomIds = await sudokuUseCases.findRoomsPvp(difficulty);
@@ -114,6 +113,30 @@ export default function registerPvpEvents(
         } catch (error) {
             console.log('Error al salir de la sala: ' + error);
             if (typeof callback === 'function') callback({ success: false, payload: 'No se ha podido salir de la sala' });
+        }
+    })
+
+
+    socket.on('reconnect-to-pvp-game', async (sudokuLSObj: { sudokuId: string, difficulty: Difficulty }, callback: SocketCallback) => {
+        try {
+            console.log('reconnect-to-pvp-game', sudokuLSObj);
+            const sudoku = await sudokuUseCases.getSudokuByIdPvp(sudokuLSObj.sudokuId, sudokuLSObj.difficulty);
+
+            //quitamos user de las otras salas
+            /* const socketRooms = Array.from(socket.rooms).filter(room => room !== socket.id);
+            if (socketRooms.length > 0) {
+                console.log(`Leaving ${socketRooms.length} additional rooms`);
+                socketRooms.forEach(room => {
+                    socket.leave(room);
+                });
+            } */
+
+            socket.join(sudokuLSObj.sudokuId);
+            callback({ success: true, payload: sudoku });
+        } catch (error) {
+            console.log('Error al obtener sudoku: ' + error);
+            if (typeof callback === 'function') callback({ success: false, payload: 'No se ha obtenido sudoku, vuelve a intentarlo.' });
+
         }
     })
 
@@ -218,7 +241,7 @@ export default function registerPvpEvents(
     socket.on('quit-pvp-game', async (difficulty: Difficulty) => {
         try {
             const sudokuId = Array.from(socket.rooms).find((room) => room !== socket.id);
-            const message = await sudokuUseCases.quitUserAndCheckVictory(user.email, sudokuId!, difficulty );
+            const message = await sudokuUseCases.quitUserAndCheckVictory(user.email, sudokuId!, difficulty);
 
             if (message === 'partida terminada') {
                 //TODO: VICTORIA LÓGICA

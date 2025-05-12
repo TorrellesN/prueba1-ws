@@ -1,40 +1,35 @@
-import { createContext, useEffect } from "react";
+import { createContext, useEffect, useRef } from "react";
 import { useSocket } from "../hooks/useSocket";
 import { Socket } from "socket.io-client";
-
 
 type SocketContextProps = {
     online: boolean,
     socket: Socket,
-    connectSocket:  () => void,
-    disconnectSocket:  () => void
+    connectSocket: () => void,
+    disconnectSocket: () => void
 }
 
-export const SocketContext = createContext<SocketContextProps>(null!); 
+export const SocketContext = createContext<SocketContextProps>(null!);
 
-
-export const SocketProvider = ({children}: {children : React.ReactNode}) => {
+export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
     const { socket, online, connectSocket, disconnectSocket } = useSocket(
         import.meta.env.VITE_API_URL_DEVELOPMENT_SOCKET,
         ['/pve', '/pvp']
     );
 
-    //aquí se pueden hacer escuchas también
+    const listenersRegistered = useRef(false);
+
     useEffect(() => {
-        if (online) {
-            console.log('conexion establecida')
-        } else {
-            console.log('desconectando')
+        if (online && !listenersRegistered.current) {
+            console.log('conexion establecida');
+            listenersRegistered.current = true;
+        } else if (!online) {
+            console.log('desconectando');
+            listenersRegistered.current = false;
         }
         return () => {
         }
-
-    }, [ online ]);
-
-    /* const enviarMensaje = useCallback((mensaje) => {
-        socket.current.emit('mensaje', mensaje);
-        }, []); */
-
+    }, [online]);
 
     return (
         <SocketContext.Provider value={{
@@ -43,9 +38,8 @@ export const SocketProvider = ({children}: {children : React.ReactNode}) => {
             connectSocket,
             disconnectSocket
         }}>
-        {children}
+            {children}
         </SocketContext.Provider>
     )
-
 }
 

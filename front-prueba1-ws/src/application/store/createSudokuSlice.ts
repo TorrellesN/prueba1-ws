@@ -1,6 +1,5 @@
 import { StateCreator } from "zustand";
 import { Difficulty, PlayerSudokuBoard, SudokuBoardSolved, SudokuStatus, Player, initialPVESudoku, SudokuPVE, SudokuPVP, CellToInsert, pointsPerCell, RolNumber, initialPVPSudoku } from "../../domain/";
-import { all } from "axios";
 
 export type SudokuStateType = {
   id?: string,
@@ -12,7 +11,7 @@ export type SudokuStateType = {
   difficulty: Difficulty,
   comboAcc: number,
   points: number,
-  rol: RolNumber | null,
+  rol: RolNumber,
   setInnitialSudokuState: (sudoku: SudokuPVE | SudokuPVP) => void,
   setStartedSudokuState: (sudoku: SudokuPVE | SudokuPVP) => void,
   setSelfPlayer: (player: Player) => void,
@@ -44,7 +43,7 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
   difficulty: initialPVESudoku.difficulty,
   comboAcc: 0,
   points: 0,
-  rol: null,
+  rol: 0,
 
 
 
@@ -67,51 +66,47 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
     if (!('players' in sudoku)) {
       localStorage.setItem('sudokuRoomPve', sudoku.id!)
       set({ rol: 1 });
-    } else {
-     /*  const {players} = get();
-      if (players.length > 0) {
-        players.
-      } */
-      //se pone al iniciar la partida para no poder volver al sudoku si está en estado new en bd
-      /* localStorage.setItem('sudokuRoomPvp', sudoku.id!) */
     }
   },
 
   setStartedSudokuState: (sudoku: SudokuPVE | SudokuPVP) => {
+    let players: Player[] = []
+    const { user } = api.getState() as any;
+    if ('players' in sudoku) {
+      players = sudoku.players.filter((player: Player) => player.email !== user.email);
+    }
+
     set({
       id: sudoku.id,
       current: sudoku.current,
       solved: sudoku.solved,
       status: 'started',
-      players: 'players' in sudoku ? sudoku.players : [],
+      players: players,
       difficulty: sudoku.difficulty,
     })
 
     //TODO: por el momento usar api para recoger algo del otro slice, más tarde implementar bien zustand
-    const { email } = api.getState() as any;
 
     if (!('players' in sudoku) && 'player' in sudoku) {
       set({
-        comboAcc: sudoku.player?.comboAcc || 0,
+        comboAcc: sudoku.player?.comboAcc && sudoku.player?.comboAcc > 10 ? 10 : sudoku.player?.comboAcc || 0,
         points: sudoku.player?.points || 0,
         rol: 1
       })
       localStorage.setItem('sudokuRoomPve', sudoku.id!)
 
     } else if ('players' in sudoku) {
-      const player = sudoku.players.find((player: Player) => player.email === email)
-      set({
-        comboAcc: player?.comboAcc || 0,
-        points: player?.points || 0,
-        rol: player?.rol
-      })
-      localStorage.setItem('sudokuRoomPvp', sudoku.id!)
-
+      const player = sudoku.players.find((player: Player) => player.email === user.email)
+      console.log('player', player)
+      get().setSelfPlayer(player!);
     }
   },
 
 
   restartSudokuState: () => {
+    const sudokuLSObj = localStorage.getItem('sudokuRoomPvp') ? JSON.parse(localStorage.getItem('sudokuRoomPvp')!) : null;
+    const sudokuPve = localStorage.getItem('sudokuRoomPve');
+    console.log(32)
     set({
       id: '',
       current: initialPVESudoku.current,
@@ -120,18 +115,27 @@ export const createSudokuSlice: StateCreator<SudokuStateType> = (set, get, api) 
       players: [],
       difficulty: initialPVESudoku.difficulty,
       comboAcc: 0,
-      points: 0
-    })
-    localStorage.removeItem('sudokuRoomPve');
+      points: 0,
+      rol: /* sudokuLSObj ? get().rol :  */0
+    });
+    
+    if (sudokuLSObj) {
+      localStorage.removeItem('sudokuRoomPvp');
+    } else if (sudokuPve) {
+      localStorage.removeItem('sudokuRoomPve');
+    }
+    
   },
 
 
   setSelfPlayer: (player: Player) => {
+    
     set({
-      comboAcc: player?.comboAcc || 0,
+      comboAcc: player?.comboAcc && player?.comboAcc > 10 ? 10 : player?.comboAcc || 0,
       points: player?.points || 0,
-      rol: player?.rol,
+      rol: player.rol,
     })
+    console.log(1, get().rol)
   },
 
   addPLayer: (player: Player) => {

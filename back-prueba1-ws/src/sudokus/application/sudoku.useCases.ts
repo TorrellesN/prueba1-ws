@@ -86,4 +86,8 @@ export default class SudokuUseCases {
         else return "jugador eliminado";
     }
 
+    async getSudokuByIdPvp(sudokuId: string, difficulty: Difficulty): Promise<SudokuPVP> {
+        return await this.sudokuRepository.getSudokuByIdPvp(sudokuId, difficulty);
+    }
+
 }

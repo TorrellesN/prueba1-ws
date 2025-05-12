@@ -1,4 +1,5 @@
 import { Button, Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
+import { useNavigate } from "react-router-dom";
 
 type quitGameModalProps = {
     isOpenModal: boolean,
@@ -7,6 +8,7 @@ type quitGameModalProps = {
 }
 
 export default function QuitGameModal({ isOpenModal, close, handleQuit }: quitGameModalProps) {
+    const navigate = useNavigate();
     return (
         <Dialog open={isOpenModal} as="div" className="relative z-10 focus:outline-none" onClose={close}>
             <div className="fixed inset-0 z-10 w-screen overflow-y-auto">
@@ -25,8 +27,8 @@ export default function QuitGameModal({ isOpenModal, close, handleQuit }: quitGa
                             <Button
                                 className="inline-flex items-center gap-2 rounded-md bg-gray-700 px-3 py-1.5 text-sm/6 font-semibold text-white shadow-inner shadow-white/10 focus:not-data-focus:outline-none data-focus:outline data-focus:outline-white data-hover:bg-gray-600 data-open:bg-gray-700"
                                 onClick={() => {
-                                    close();
                                     handleQuit();
+                                    navigate('/');
                                 }
                                 }
                             >

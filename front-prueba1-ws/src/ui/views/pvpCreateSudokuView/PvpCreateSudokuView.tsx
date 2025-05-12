@@ -2,7 +2,7 @@ import { useContext, useMemo, useState } from "react"
 import { SocketContext } from "../../../application/context/socketContext"
 import { Listbox } from "@headlessui/react"
 import { useNavigate } from "react-router-dom"
-import { Difficulty, diffOptions, SocketCResponse } from "../../../domain";
+import { Difficulty, diffOptions, Player, SocketCResponse } from "../../../domain";
 import { useAppStore } from "../../../application/store/useAppStore";
 import { toast } from "react-toastify";
 
@@ -15,15 +15,16 @@ export default function PvpCreateSudokuView() {
   const setInnitialSudokuState = useAppStore(state => state.setInnitialSudokuState);
   const setSelfPlayer = useAppStore(state => state.setSelfPlayer);
   const setStartedSudokuState = useAppStore(state => state.setStartedSudokuState);
+  const setFinishedState = useAppStore(state => state.setFinishedState);
+  const user = useAppStore(state => state.user);
   const { socket, online } = useContext(SocketContext);
-  const [lastGameId, setLastGameId] = useState<string | null>(
+  const [lastGameObj, setLastGameObj] = useState<string | null>(
     localStorage.getItem('sudokuRoomPvp')
-      ? localStorage.getItem('sudokuRoomPvp') : null
+      ? JSON.parse(localStorage.getItem('sudokuRoomPvp')!) : null
   )
 
 
   const handleSudokuCreate = () => {
-    console.log('dificultad', difficulty)
     if (difficulty) {
       setIsLoading(true);
 
@@ -43,22 +44,43 @@ export default function PvpCreateSudokuView() {
     }
   }
 
-  //TODO: hacer en back listener para recargar partida pvp
   const handleLastGame = () => {
     setIsLoading(true);
-    const sudokuId = lastGameId;
-    if (sudokuId && online) {
-      socket.emit('reconnect-to-pvp-game', sudokuId, (response: SocketCResponse) => {
-        if (response.success) {
+    if (lastGameObj && online) {
+      // En lugar de navegar directamente, utilizamos el socket para verificar primero
+      socket.emit('reconnect-to-pvp-game', lastGameObj, (response: SocketCResponse) => {
+        if (response.success && 'current' in response.payload) {
+          const players = [...response.payload.players];
+          const playerIndex = players.findIndex((player: Player) => player.email === user?.email);
+          
+          // Si el jugador no existe en la sala
+          if (playerIndex === -1) {
+            toast.warning('No perteneces a este sudoku');
+            localStorage.removeItem('sudokuRoomPvp');
+            setLastGameObj(null);
+            setIsLoading(false);
+            return;
+          }
+          
+          // Establecemos el estado y navegamos
           setStartedSudokuState(response.payload);
           setIsLoading(false);
-          navigate(`/pvp/sudoku`);
+          
+          // Añadimos un flag al localStorage para indicar que ya estamos reconectados
+          localStorage.setItem('reconnectAttempted', 'true');
+          
+          navigate('/pvp/sudoku');
+        } else if (response.success && response.payload === 'finished') {
+          toast.warning('Parece que el sudoku al que estás intentando reconectar ya ha terminado');
+          localStorage.removeItem('sudokuRoomPvp');
+          setLastGameObj(null);
+          setIsLoading(false);
         } else {
           console.error('Error al reconectar', response.payload);
           setIsLoading(false);
         }
       });
-    } else if (!lastGameId) {
+    } else if (!lastGameObj) {
       toast.error('No hay ninguna partida en curso');
       setIsLoading(false);
     }
@@ -131,10 +153,10 @@ export default function PvpCreateSudokuView() {
 
         <button
           className={`bg-purple-400  text-white text-xl font-bold transition-colors px-10 py-3
-            ${!lastGameId
+            ${!lastGameObj
               ? 'opacity-50 cursor-default'
               : 'cursor-pointer hover:bg-purple-600'}`}
-          disabled={!lastGameId}
+          disabled={!lastGameObj}
           onClick={handleLastGame}
         >Volver a la partida</button>
       </div>

@@ -1,15 +1,16 @@
-import React, { use, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { SudokuPVP } from '../../../../domain';
 
 type CountdownProps = {
     setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
     sudokuId: SudokuPVP['id'];
+    difficulty: SudokuPVP['difficulty'];
 }
 
-export default function Countdown({ setIsLoading, sudokuId }: CountdownProps) {
+export default function Countdown({ setIsLoading, sudokuId, difficulty }: CountdownProps) {
 
     const onCountdown = () => {
-        localStorage.setItem('sudokuRoomPvp', sudokuId!);
+        
         setIsLoading(false);
     }
 
@@ -29,7 +30,8 @@ export default function Countdown({ setIsLoading, sudokuId }: CountdownProps) {
     }
 
     useEffect(() => {
-
+        console.log('AAA')
+        localStorage.setItem('sudokuRoomPvp', JSON.stringify({sudokuId: sudokuId!, difficulty: difficulty!}));
         handleCountdown();
     }, [])
 
