@@ -186,7 +186,7 @@ export default function registerPvpEvents(
             if (bdSavedMove.message === 'partida terminada') {
                 try {
                     //TODO: en pvp añadimos logica para ganadores/perdedores. llama a postgre para actualizar
-                    //TODO VICTORIAAAS
+                    //TODO: VICTORIAS
                     await sudokuUseCases.finishGamePve(sudokuRoom);
 
                     io.to(sudokuRoom).emit('sudoku-finished', { message: 'partida terminada' });

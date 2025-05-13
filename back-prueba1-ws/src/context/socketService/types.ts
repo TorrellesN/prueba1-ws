@@ -1,5 +1,5 @@
 import { SudokuPVP } from "../../sudokus/domain/Sudoku"
-import { Player } from "../../users/domain/Player"
+import { Player, RolNumber } from "../../users/domain/Player"
 
 export type SocketCallback = (response: { success: boolean, payload: any }) => void
 export type SudokuAndPlayer = {
@@ -9,4 +9,10 @@ export type SudokuAndPlayer = {
 export type SavedMoveUseCasesResponse = {
     message: string;
     player: Player;
+}
+export type SudokuPvpResolvedResponse = {
+    sudokuSolved: SudokuPVP['current']
+    players: Player[];
+    playersSudokoins: { rol: RolNumber, sudokoins: number, win: boolean }[];
+    createdAt?: Date,
 }

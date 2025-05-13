@@ -279,6 +279,14 @@ export default class SudokuRepositoryMongoDB implements SudokuRepository {
     }
 
 
+    async finishGamePvp(sudokuId: string, difficulty: Difficulty): Promise<SudokuPVP> {
+        const collection = this.getMongoPvpCollection(difficulty);
+        const result = await collection.findOneAndDelete({_id: new ObjectId(sudokuId)});
+        if (!result) throw new Error('404');
+                const { current, solved, emptyCellsCount, players } = result;
+        const sudokuPvp : SudokuPVP= { current, solved, difficulty, emptyCellsCount, players }; 
+        return sudokuPvp;
+    }
 
 }
 

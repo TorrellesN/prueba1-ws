@@ -1,4 +1,5 @@
 import { compare, hash } from "../../context/security/encrypter";
+import { Difficulty } from "../../sudokus/domain/Sudoku";
 import User, { UserAuth } from "../domain/User";
 import UserRepository from "../domain/user.repository";
 

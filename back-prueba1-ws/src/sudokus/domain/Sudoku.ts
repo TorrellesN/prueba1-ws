@@ -14,7 +14,7 @@ export type SudokuPVP = {
     players: Player[]
 }
 
-export type SudokuPVE = Omit<SudokuPVP, 'players'> & {player?: Player};
+export type SudokuPVE = Omit<SudokuPVP, 'players'> & { player?: Player };
 
 /* SECONDARY TYPES */
 type Cell = { row: number; col: number; value: number | null };
@@ -30,17 +30,31 @@ type FormattedSudokuBoard = FormattedCell[][];
 type Difficulty = "easy" | "medium" | "hard";
 type SudokuStatus = "new" | "started" | "finished";
 
+const sudoKoinsByDifficulty = {
+    'easy': {
+        win: 3,
+        lose: 1
+    },
+    'medium': {
+        win: 5,
+        lose: 2
+    },
+    'hard': {
+        win: 7,
+        lose: 3
+    }
+}
+
 export {
     Cell, Difficulty, FormattedCell, CellToInsert,
     FormattedSudokuBoard, SudokuBoard, SudokuBoardSolved, SudokuStatus
 };
 
-//aspectos a tener en cuenta: isPrivate
 
 /* INITIALIZE METHODS */
-export const buildPveBoard =  (user: User, difficulty: Difficulty): SudokuPVE => {
-    const {current, solved, emptyCellsCount} =  createSudokuGame(difficulty);
-    
+export const buildPveBoard = (user: User, difficulty: Difficulty): SudokuPVE => {
+    const { current, solved, emptyCellsCount } = createSudokuGame(difficulty);
+
     return {
         current,
         solved,
@@ -52,11 +66,11 @@ export const buildPveBoard =  (user: User, difficulty: Difficulty): SudokuPVE =>
     }
 }
 
-export const buildPvpBoard =  (user: User, difficulty: Difficulty): SudokuPVP => {
-    const {current, solved, emptyCellsCount} =  createSudokuGame(difficulty);
+export const buildPvpBoard = (user: User, difficulty: Difficulty): SudokuPVP => {
+    const { current, solved, emptyCellsCount } = createSudokuGame(difficulty);
     const players: Player[] = []
     players.push(newPlayer(user, 1));
-    
+
     return {
         current,
         solved,
@@ -68,14 +82,21 @@ export const buildPvpBoard =  (user: User, difficulty: Difficulty): SudokuPVP =>
     }
 }
 
+
+export const getSudoKoinsByDifficulty = (difficulty: Difficulty, win: boolean) => {
+    const { win: winKoins, lose: loseKoins } = sudoKoinsByDifficulty[difficulty];
+    return win ? winKoins : loseKoins;
+}
+
+
 //para desarrollo
 function printMatrixNumbers(matrix: SudokuPVE['current']) {
     for (let i = 0; i < matrix.length; i++) {
-      let row = matrix[i];
-      let numbers= row.map(obj => obj === null ? 'x' : obj.value).join('  ');
-      console.log(numbers);
+        let row = matrix[i];
+        let numbers = row.map(obj => obj === null ? 'x' : obj.value).join('  ');
+        console.log(numbers);
     }
-  } 
+}
 
 
 
